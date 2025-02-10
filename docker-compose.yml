@@ -13,7 +13,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  rentify-api:
+  rentify:
     build:
       context: ./
       dockerfile: Dockerfile
@@ -27,8 +27,8 @@ services:
       POSTGRESQL_VERSION: 42.6.0
       JBOSS_HOME: /opt/jboss/wildfly
       VALID_CONNECTION_CHECKER: org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker
-#    depends_on:
-#      - postgres
+    depends_on:
+      - postgres
     volumes:
       - ./target:/app/target
       - ./maven_cache:/root/.m2

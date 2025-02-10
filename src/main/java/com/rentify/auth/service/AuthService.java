@@ -11,13 +11,12 @@ import com.rentify.user.dto.UserDTO;
 import com.rentify.user.entity.Role;
 import com.rentify.user.entity.User;
 import com.rentify.user.service.mapper.UserMapper;
+import com.rentify.wallet.service.WalletService;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import org.mindrot.jbcrypt.BCrypt;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -39,12 +38,19 @@ public class AuthService {
     @Inject
     UserMapper userMapper;
 
+    @Inject
+    WalletService walletService;
+
     public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
         User user = userDAO.findByEmail(loginRequestDTO.getEmail())
                 .orElseThrow(() -> new BadRequestException(INVALID_EMAIL_OR_PASSWORD));
 
         if (!BCrypt.checkpw(loginRequestDTO.getPassword(), user.getPassword())) {
             throw new BadRequestException(INVALID_EMAIL_OR_PASSWORD);
+        }
+
+        if (user.getDeletedAt() != null) {
+            throw new BadRequestException(ACCOUNT_DELETED);
         }
 
         String accessToken = generateJWT(user);
@@ -76,24 +82,28 @@ public class AuthService {
         user.setPassword(hashedPassword);
         user.setRole(Role.valueOf(registerRequestDTO.getRole().toUpperCase()));
 
-        userDAO.save(user);
+        walletService.initWallet(userDAO.save(user));
 
         return userMapper.toDTO(user);
     }
 
     private void validateRegisterRequest(RegisterRequestDTO request) {
-        List<String> errors = new ArrayList<>();
+        Map<String, String> errors = new HashMap<>();
 
         if (userDAO.findByEmail(request.getEmail()).isPresent()) {
-            errors.add(EMAIL_ALREADY_USED);
+            errors.put("email", EMAIL_ALREADY_USED);
+        }
+
+        if (request.getPhoneNumber().length() != 10) {
+            errors.put("phoneNumber", PHONE_NUMBER_INVALID);
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            errors.add(PASSWORDS_DO_NOT_MATCH);
+            errors.put("password", PASSWORDS_DO_NOT_MATCH);
         }
 
         if (!Pattern.compile(PASSWORD_VALIDATION_REGEX).matcher(request.getPassword()).matches()) {
-            errors.add(INVALID_PASSWORD_FORMAT);
+            errors.put("password", INVALID_PASSWORD_FORMAT);
         }
 
         String role = request.getRole().toUpperCase();
@@ -105,11 +115,11 @@ public class AuthService {
             }
         }
         if (!isValidRole) {
-            errors.add(INVALID_ROLE);
+            errors.put("role", INVALID_ROLE);
         }
 
         if (!errors.isEmpty()) {
-            throw new BadRequestException(errors.toString());
+            throw new BadRequestException(errors);
         }
     }
 

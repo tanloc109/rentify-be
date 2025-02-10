@@ -3,7 +3,6 @@ package com.rentify.auth.rest;
 import com.rentify.auth.contants.AuthResponseMessage;
 import com.rentify.auth.dto.LoginRequestDTO;
 import com.rentify.auth.dto.RegisterRequestDTO;
-import com.rentify.auth.dto.RegisterValidationResponseDTO;
 import com.rentify.auth.service.AuthService;
 import com.rentify.base.contants.ApplicationMessage;
 import com.rentify.base.response.ResponseBody;
@@ -20,8 +19,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import java.util.Map;
 
 @Path("auth")
 @Tag(name = "Authentication", description = "Operations related to authentication")
@@ -48,7 +45,7 @@ public class AuthRest {
             @ApiResponse(responseCode = "500", description = ApplicationMessage.INTERNAL_SEVER_ERROR)
     })
     public Response login(@Valid LoginRequestDTO loginDTO) {
-        return Response.ok().entity(new ResponseBody(
+        return Response.ok().entity(new ResponseBody<>(
                 AuthResponseMessage.LOGIN_SUCCESSFULLY,
                 authService.login(loginDTO)
         )).build();
@@ -58,8 +55,15 @@ public class AuthRest {
     @Path("register")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Register successfully"),
+            @ApiResponse(responseCode = "400", description = ApplicationMessage.BAD_REQUEST_ERROR),
+            @ApiResponse(responseCode = "401", description = ApplicationMessage.UNAUTHORIZED),
+            @ApiResponse(responseCode = "403", description = ApplicationMessage.FORBIDDEN),
+            @ApiResponse(responseCode = "500", description = ApplicationMessage.INTERNAL_SEVER_ERROR)
+    })
     public Response register(RegisterRequestDTO requestDTO) {
-        return Response.status(Response.Status.CREATED).entity(new ResponseBody(
+        return Response.status(Response.Status.CREATED).entity(new ResponseBody<>(
                 AuthResponseMessage.REGISTER_SUCCESSFULLY,
                 authService.register(requestDTO)
         )).build();

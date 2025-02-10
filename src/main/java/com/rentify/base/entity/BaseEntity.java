@@ -25,6 +25,8 @@ public class BaseEntity implements Serializable {
     @UpdateTimestamp
     protected LocalDateTime updatedAt;
 
+    protected LocalDateTime deletedAt;
+
     @Version
     protected Timestamp version;
 }

@@ -14,8 +14,8 @@ import lombok.SneakyThrows;
 
 import java.io.IOException;
 
-@Provider
 @Secure
+@Provider
 @Priority(Priorities.AUTHENTICATION)
 public class AuthenticationFilter implements ContainerRequestFilter {
     private static final String AUTHORIZATION_HEADER = "Authorization";
