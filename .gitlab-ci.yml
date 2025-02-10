@@ -1,0 +1,38 @@
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  only:
+    - develop
+    - test
+  script:
+    - |
+      if [ "$CI_COMMIT_REF_NAME" == "develop" ]; then
+        export DB_NAME="agile_assessment_dev"
+        export COMPOSE_FILE="docker-compose.dev.yml"
+      elif [ "$CI_COMMIT_REF_NAME" == "test" ]; then
+        export DB_NAME="agile_assessment_test"
+        export COMPOSE_FILE="docker-compose.test.yml"
+      fi
+
+      sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $USER_NAME@$IP_SERVER \
+      DB_NAME="$DB_NAME" COMPOSE_FILE="$COMPOSE_FILE" BRANCH="$CI_COMMIT_REF_NAME" 'bash -s' << 'EOF'
+        cd /home/junior25/agile-assessment
+        git stash -u
+        git fetch origin
+        git checkout $BRANCH
+        git pull
+        sed -i "s|ARG DB_HOST=.*|ARG DB_HOST=jdbc:postgresql://$IP_SERVER:5432/${DB_NAME}|" Dockerfile
+        docker compose -f $COMPOSE_FILE up --build --detach
+      EOF
+
+  tags:
+    - runner-java
+
+variables:
+  GIT_STRATEGY: fetch
+  IP_SERVER: $IP_SERVER
+  USER_NAME: $USER_NAME
+  SSH_PASSWORD: $SSH_PASSWORD
+
