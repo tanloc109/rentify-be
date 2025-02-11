@@ -40,8 +40,6 @@ public class AuthRest {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Login successfully"),
             @ApiResponse(responseCode = "400", description = ApplicationMessage.BAD_REQUEST_ERROR),
-            @ApiResponse(responseCode = "401", description = ApplicationMessage.UNAUTHORIZED),
-            @ApiResponse(responseCode = "403", description = ApplicationMessage.FORBIDDEN),
             @ApiResponse(responseCode = "500", description = ApplicationMessage.INTERNAL_SEVER_ERROR)
     })
     public Response login(@Valid LoginRequestDTO loginDTO) {
@@ -58,8 +56,6 @@ public class AuthRest {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Register successfully"),
             @ApiResponse(responseCode = "400", description = ApplicationMessage.BAD_REQUEST_ERROR),
-            @ApiResponse(responseCode = "401", description = ApplicationMessage.UNAUTHORIZED),
-            @ApiResponse(responseCode = "403", description = ApplicationMessage.FORBIDDEN),
             @ApiResponse(responseCode = "500", description = ApplicationMessage.INTERNAL_SEVER_ERROR)
     })
     public Response register(RegisterRequestDTO requestDTO) {

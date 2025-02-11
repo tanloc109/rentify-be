@@ -1,14 +1,16 @@
-package com.rentify.auth.dto;
+package com.rentify.transaction.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.math.BigDecimal;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LoginRequestDTO {
-    String email;
-    String password;
+public class TransactionRequestDTO {
+    BigDecimal amount;
+    String type;
 }

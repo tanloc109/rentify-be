@@ -1,4 +1,4 @@
-package com.rentify.auth.dto;
+package com.rentify.brand.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LoginRequestDTO {
-    String email;
-    String password;
+public class BrandRequestDTO {
+    String name;
+    String country;
 }
