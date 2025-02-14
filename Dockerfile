@@ -21,7 +21,7 @@ RUN /opt/jboss/wildfly/bin/add-user.sh root Aavn123!@# --silent
 EXPOSE 8080 9990
 
 ENV DATASOURCE_NAME PostgresDS
-ENV DATASOURCE_JNDI java:jboss/jdbc/PostgresDS
+ENV DATASOURCE_JNDI java:/PostgresDS
 ENV POSTGRESQL_VERSION 42.6.0
 ENV JBOSS_HOME /opt/jboss/wildfly
 ENV VALID_CONNECTION_CHECKER org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker

@@ -45,6 +45,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         }
     }
 
+    // Throws thử + ý nghĩa
     @SneakyThrows
     private JwtPayload getPayloadFromToken(String token) {
         try {

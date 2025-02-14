@@ -72,6 +72,26 @@ public class UserRest {
         return Response.ok().entity(new ResponseBody<>("User retrieved successfully", user)).build();
     }
 
+    @GET
+    @Path("/email")
+    @Secure(roles = "ADMIN")
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    @SecurityRequirement(name = "bearerAuth")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = ApplicationMessage.BAD_REQUEST_ERROR),
+            @ApiResponse(responseCode = "401", description = ApplicationMessage.UNAUTHORIZED),
+            @ApiResponse(responseCode = "403", description = ApplicationMessage.FORBIDDEN),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = ApplicationMessage.INTERNAL_SEVER_ERROR)
+    })
+    @Operation(summary = "Get a user", description = "Get a user by their email")
+    public Response getUserByEmail(@QueryParam("email") String email) {
+        UserDTO user = userService.findByEmail(email);
+        return Response.ok().entity(new ResponseBody<>("User retrieved successfully", user)).build();
+    }
+
     @PUT
     @Path("/{userId}")
     @Secure(roles = "ADMIN")

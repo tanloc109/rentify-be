@@ -30,4 +30,10 @@ public class UserDAO extends BaseDAO<User> {
         return result.stream().findFirst();
     }
 
+//   Review Entity Manager
+    public Optional<User> getByEmail(String email) {
+        return Optional.ofNullable(entityManager.createQuery("SELECT u FROM User u WHERE email=:email", User.class).setParameter("email", email).getSingleResult());
+    }
+
+
 }

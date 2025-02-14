@@ -37,6 +37,14 @@ public class UserService {
         return userMapper.toDTO(user);
     }
 
+    public UserDTO findByEmail(String email) {
+        User user = userDAO.getByEmail(email).orElseThrow(() -> new IdNotFoundException("Cannot found user with email: " + email));
+        if (user.getDeletedAt() != null) {
+            throw new BadRequestException(String.format("User with email %s is deleted before", email));
+        }
+        return userMapper.toDTO(user);
+    }
+
     public UserDTO updateUser(Long userId, UserUpdateRequest userDTO) {
         User updateUser = userDAO.findById(userId).orElseThrow(() -> new IdNotFoundException("Cannot found user with id: " + userId));
         if (updateUser.getDeletedAt() != null) {
@@ -54,4 +62,5 @@ public class UserService {
         deleteUser.setDeletedAt(LocalDateTime.now());
         userDAO.update(deleteUser);
     }
+
 }

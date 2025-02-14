@@ -4,7 +4,7 @@
              xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
              version="3.0">
     <persistence-unit name="rentify" transaction-type="JTA">
-        <jta-data-source>java:jboss/jdbc/PostgresDS</jta-data-source>
+        <jta-data-source>java:/PostgresDS</jta-data-source>
         <properties>
             <property name="jakarta.persistence.schema-generation.database.action" value="update"/>
             <property name="hibernate.physical_naming_strategy" value="org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy"/>
