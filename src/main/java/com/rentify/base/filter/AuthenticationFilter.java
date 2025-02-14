@@ -68,6 +68,9 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     }
 
     private void checkAccess(String userRole, List<String> allowedRoles) {
+        if (allowedRoles.contains("*")) {
+            return;
+        }
         if (!allowedRoles.contains(userRole)) {
             throw new ForbiddenException(ApplicationMessage.UNAUTHORIZED);
         }
