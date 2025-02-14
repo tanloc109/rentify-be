@@ -1,5 +1,6 @@
 package com.rentify.base.filter;
 
+import com.rentify.base.contants.ApplicationMessage;
 import com.rentify.base.exception.ForbiddenException;
 import com.rentify.base.exception.UnauthorizedException;
 import com.rentify.base.security.JwtGenerator;
@@ -12,7 +13,6 @@ import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.ext.Provider;
-import lombok.SneakyThrows;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -44,14 +44,11 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             checkAccess(String.valueOf(payload.getRole()), Arrays.asList(secure.roles()));
         }
     }
-
-    // Throws thử + ý nghĩa
-    @SneakyThrows
     private JwtPayload getPayloadFromToken(String token) {
         try {
             return JwtPayload.fromMap(jwtGenerator.validateToken(token));
         } catch (UnauthorizedException e) {
-            throw new UnauthorizedException("Invalid or expired token");
+            throw new UnauthorizedException(ApplicationMessage.INVALID_TOKEN);
         }
     }
 
@@ -59,20 +56,20 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         String authHeader = reqCtx.getHeaderString(AUTHORIZATION_HEADER);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new UnauthorizedException("Missing or invalid Authorization header");
+            throw new UnauthorizedException(ApplicationMessage.MISSING_TOKEN_ERROR);
         }
 
-        String[] parts = authHeader.split(" ", 2);
-        if (parts.length < 2 || parts[1].trim().isEmpty()) {
-            throw new UnauthorizedException("Invalid or expired token!");
+        String token = authHeader.substring(7).trim();
+        if (token.isEmpty()) {
+            throw new UnauthorizedException(ApplicationMessage.INVALID_TOKEN);
         }
 
-        return parts[1].trim();
+        return token;
     }
 
     private void checkAccess(String userRole, List<String> allowedRoles) {
         if (!allowedRoles.contains(userRole)) {
-            throw new ForbiddenException("Access denied: insufficient permissions");
+            throw new ForbiddenException(ApplicationMessage.UNAUTHORIZED);
         }
     }
 }
