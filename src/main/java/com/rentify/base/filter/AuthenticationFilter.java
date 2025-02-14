@@ -6,12 +6,15 @@ import com.rentify.base.exception.UnauthorizedException;
 import com.rentify.base.security.JwtGenerator;
 import com.rentify.base.security.JwtPayload;
 import jakarta.annotation.Priority;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.ext.Provider;
 
 import java.io.IOException;
@@ -19,12 +22,10 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
-@Secure
 @Provider
 @Priority(Priorities.AUTHENTICATION)
 public class AuthenticationFilter implements ContainerRequestFilter {
-    private static final String AUTHORIZATION_HEADER = "Authorization";
-    private static final String JWT_PAYLOAD_ATTRIBUTE = "jwtPayload";
+    private static final String BEARER_PREFIX = "Bearer ";
 
     @Inject
     private JwtGenerator jwtGenerator;
@@ -34,37 +35,30 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext reqCtx) throws IOException {
-        String token = getTokenFromHeader(reqCtx);
-        JwtPayload payload = getPayloadFromToken(token);
-        reqCtx.setProperty(JWT_PAYLOAD_ATTRIBUTE, payload);
-
         Method method = resourceInfo.getResourceMethod();
-        if (method.isAnnotationPresent(Secure.class)) {
-            Secure secure = method.getAnnotation(Secure.class);
-            checkAccess(String.valueOf(payload.getRole()), Arrays.asList(secure.roles()));
+        if (method.isAnnotationPresent(RolesAllowed.class)) {
+            String token = getTokenFromHeader(reqCtx);
+            JwtPayload payload = getPayloadFromToken(token);
+
+            RolesAllowed rolesAllowed = method.getAnnotation(RolesAllowed.class);
+            checkAccess(String.valueOf(payload.getRole()), Arrays.asList(rolesAllowed.value()));
         }
     }
+
+    private String getTokenFromHeader(ContainerRequestContext reqCtx) {
+        String authHeader = reqCtx.getHeaderString(HttpHeaders.AUTHORIZATION);
+        if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
+            throw new UnauthorizedException(ApplicationMessage.MISSING_TOKEN_ERROR);
+        }
+        return authHeader.substring(BEARER_PREFIX.length()).trim();
+    }
+
     private JwtPayload getPayloadFromToken(String token) {
         try {
             return JwtPayload.fromMap(jwtGenerator.validateToken(token));
         } catch (UnauthorizedException e) {
             throw new UnauthorizedException(ApplicationMessage.INVALID_TOKEN);
         }
-    }
-
-    private String getTokenFromHeader(ContainerRequestContext reqCtx) {
-        String authHeader = reqCtx.getHeaderString(AUTHORIZATION_HEADER);
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new UnauthorizedException(ApplicationMessage.MISSING_TOKEN_ERROR);
-        }
-
-        String token = authHeader.substring(7).trim();
-        if (token.isEmpty()) {
-            throw new UnauthorizedException(ApplicationMessage.INVALID_TOKEN);
-        }
-
-        return token;
     }
 
     private void checkAccess(String userRole, List<String> allowedRoles) {

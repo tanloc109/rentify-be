@@ -1,7 +1,6 @@
 package com.rentify.type.rest;
 
 import com.rentify.base.contants.ApplicationMessage;
-import com.rentify.base.filter.Secure;
 import com.rentify.base.response.ResponseBody;
 import com.rentify.type.dto.TypeRequestDTO;
 import com.rentify.type.service.TypeService;
@@ -31,7 +30,6 @@ public class TypeRest {
     private TypeService typeService;
 
     @GET
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")
@@ -52,7 +50,6 @@ public class TypeRest {
 
     @GET
     @Path("/{typeId}")
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")
@@ -70,7 +67,6 @@ public class TypeRest {
     }
 
     @POST
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")
@@ -89,7 +85,6 @@ public class TypeRest {
 
     @PUT
     @Path("/{typeId}")
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")
@@ -108,7 +103,6 @@ public class TypeRest {
 
     @DELETE
     @Path("/{typeId}")
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")

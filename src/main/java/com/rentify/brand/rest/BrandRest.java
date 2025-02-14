@@ -1,7 +1,6 @@
 package com.rentify.brand.rest;
 
 import com.rentify.base.contants.ApplicationMessage;
-import com.rentify.base.filter.Secure;
 import com.rentify.base.response.ResponseBody;
 import com.rentify.brand.dto.BrandRequestDTO;
 import com.rentify.brand.service.BrandService;
@@ -31,7 +30,6 @@ public class BrandRest {
     private BrandService brandService;
 
     @GET
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")
@@ -52,7 +50,6 @@ public class BrandRest {
 
     @GET
     @Path("/{brandId}")
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")
@@ -70,7 +67,6 @@ public class BrandRest {
     }
 
     @POST
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")
@@ -89,7 +85,6 @@ public class BrandRest {
 
     @PUT
     @Path("/{brandId}")
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")
@@ -108,7 +103,6 @@ public class BrandRest {
 
     @DELETE
     @Path("/{brandId}")
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")

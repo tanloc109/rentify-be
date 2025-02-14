@@ -1,7 +1,6 @@
 package com.rentify.wallet.rest;
 
 import com.rentify.base.contants.ApplicationMessage;
-import com.rentify.base.filter.Secure;
 import com.rentify.base.response.ResponseBody;
 import com.rentify.transaction.dto.TransactionRequestDTO;
 import com.rentify.wallet.service.WalletService;
@@ -12,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -31,7 +31,7 @@ public class WalletRest {
     private WalletService walletService;
 
     @GET
-    @Secure(roles = {"ADMIN", "RENTER", "HOST"})
+    @RolesAllowed({"ADMIN", "RENTER", "HOST"})
     @Path("/{userId}/balance")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
@@ -49,7 +49,7 @@ public class WalletRest {
     }
 
     @POST
-    @Secure(roles = {"ADMIN", "RENTER", "HOST"})
+    @RolesAllowed({"ADMIN", "RENTER", "HOST"})
     @Path("/{userId}/deposit")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
@@ -67,7 +67,7 @@ public class WalletRest {
     }
 
     @POST
-    @Secure(roles = {"ADMIN", "RENTER", "HOST"})
+    @RolesAllowed({"ADMIN", "RENTER", "HOST"})
     @Path("/{userId}/rent-deposit")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
@@ -85,7 +85,7 @@ public class WalletRest {
     }
 
     @POST
-    @Secure(roles = {"ADMIN", "RENTER", "HOST"})
+    @RolesAllowed({"ADMIN", "RENTER", "HOST"})
     @Path("/{userId}/pay")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
@@ -103,7 +103,7 @@ public class WalletRest {
     }
 
     @POST
-    @Secure(roles = {"ADMIN", "RENTER", "HOST"})
+    @RolesAllowed({"ADMIN", "RENTER", "HOST"})
     @Path("/{userId}/refund")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
@@ -119,5 +119,4 @@ public class WalletRest {
     public Response refundMoney(@PathParam("userId") Long userId, TransactionRequestDTO transactionRequestDTO) {
         return Response.status(Response.Status.CREATED).entity(new ResponseBody<>("Refund made successfully", walletService.refundMoney(userId, transactionRequestDTO))).build();
     }
-
 }

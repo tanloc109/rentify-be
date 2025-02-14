@@ -1,7 +1,6 @@
 package com.rentify.transaction.rest;
 
 import com.rentify.base.contants.ApplicationMessage;
-import com.rentify.base.filter.Secure;
 import com.rentify.base.response.ResponseBody;
 import com.rentify.transaction.dto.TransactionRequestDTO;
 import com.rentify.transaction.service.TransactionService;
@@ -31,7 +30,6 @@ public class TransactionRest {
     private TransactionService transactionService;
 
     @GET
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")
@@ -52,7 +50,6 @@ public class TransactionRest {
 
     @GET
     @Path("/{transactionId}")
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")
@@ -71,7 +68,6 @@ public class TransactionRest {
 
     @PUT
     @Path("/{transactionId}")
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")
@@ -90,7 +86,6 @@ public class TransactionRest {
 
     @DELETE
     @Path("/{transactionId}")
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")

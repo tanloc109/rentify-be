@@ -2,7 +2,6 @@ package com.rentify.user.rest;
 
 import com.rentify.auth.contants.AuthResponseMessage;
 import com.rentify.base.contants.ApplicationMessage;
-import com.rentify.base.filter.Secure;
 import com.rentify.base.response.ResponseBody;
 import com.rentify.user.dto.UserDTO;
 import com.rentify.user.dto.UserUpdateRequest;
@@ -33,7 +32,6 @@ public class UserRest {
     private UserService userService;
 
     @GET
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")
@@ -54,7 +52,6 @@ public class UserRest {
 
     @GET
     @Path("/{userId}")
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")
@@ -74,7 +71,6 @@ public class UserRest {
 
     @GET
     @Path("/email")
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")
@@ -94,7 +90,6 @@ public class UserRest {
 
     @PUT
     @Path("/{userId}")
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")
@@ -114,7 +109,6 @@ public class UserRest {
 
     @DELETE
     @Path("/{userId}")
-    @Secure(roles = "ADMIN")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")
