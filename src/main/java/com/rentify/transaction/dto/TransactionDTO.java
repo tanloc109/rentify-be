@@ -1,5 +1,8 @@
 package com.rentify.transaction.dto;
 
+import com.rentify.transaction.entity.TransactionStatus;
+import com.rentify.transaction.entity.TransactionType;
+import com.rentify.wallet.entity.Wallet;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -16,8 +19,8 @@ public class TransactionDTO {
     Long id;
     BigDecimal amount;
     BigDecimal balance;
-    String type;
-    String status;
-    LocalDateTime createdAt;
+    TransactionType type;
+    TransactionStatus status;
+    Wallet wallet;
     Timestamp version;
 }

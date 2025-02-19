@@ -1,10 +1,12 @@
 package com.rentify.brand.entity;
 
 import com.rentify.base.entity.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import com.rentify.car.entity.Car;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.List;
 
 @Data
 @Entity
@@ -15,6 +17,12 @@ import lombok.experimental.FieldDefaults;
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "brands")
 public class Brand extends BaseEntity {
-    String name;
-    String country;
+    @Column(nullable = false, unique = true, length = 50)
+    private String name;
+
+    @Column(length = 255)
+    private String country;
+
+    @OneToMany(mappedBy = "brand", cascade = CascadeType.ALL)
+    private List<Car> cars;
 }

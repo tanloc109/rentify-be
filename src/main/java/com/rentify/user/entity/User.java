@@ -1,9 +1,15 @@
 package com.rentify.user.entity;
 
 import com.rentify.base.entity.BaseEntity;
+import com.rentify.car.entity.Car;
+import com.rentify.feedback.entity.Feedback;
+import com.rentify.rental.entity.Rental;
+import com.rentify.wallet.entity.Wallet;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.List;
 
 @Data
 @Entity
@@ -28,4 +34,16 @@ public class User extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Wallet wallet;
+
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+    private List<Car> cars;
+
+    @OneToMany(mappedBy = "renter", cascade = CascadeType.ALL)
+    private List<Rental> rentals;
+
+    @OneToMany(mappedBy = "renter", cascade = CascadeType.ALL)
+    private List<Feedback> feedbacks;
 }

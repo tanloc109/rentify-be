@@ -29,7 +29,7 @@ public abstract class BaseDAO<T> {
         return entityManager.createQuery(q).getResultList();
     }
 
-    public Optional<T> findById(long id) {
+    public Optional<T> findById(Long id) {
         return Optional.ofNullable(entityManager.find(entityClass, id));
     }
 
