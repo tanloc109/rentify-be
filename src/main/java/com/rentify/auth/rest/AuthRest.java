@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -37,6 +38,7 @@ public class AuthRest {
     @Path("login")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
+    @PermitAll
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Login successfully"),
             @ApiResponse(responseCode = "400", description = ApplicationMessage.BAD_REQUEST_ERROR),
@@ -52,6 +54,7 @@ public class AuthRest {
     @POST
     @Path("register")
     @Consumes({MediaType.APPLICATION_JSON})
+    @PermitAll
     @Produces({MediaType.APPLICATION_JSON})
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Register successfully"),

@@ -6,7 +6,6 @@ import com.rentify.base.exception.UnauthorizedException;
 import com.rentify.base.security.JwtGenerator;
 import com.rentify.base.security.JwtPayload;
 import jakarta.annotation.Priority;
-import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Priorities;
