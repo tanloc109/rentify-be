@@ -6,7 +6,7 @@
 	<artifactId>Rentify</artifactId>
 	<version>0.1.0</version>
 	<packaging>war</packaging>
-	<name>Rentifi</name>
+	<name>Rentify</name>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
