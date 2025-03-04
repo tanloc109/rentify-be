@@ -20,6 +20,18 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(callSuper = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "cars")
+@NamedQuery(
+        name = "Car.findAll",
+        query = "SELECT c FROM Car c"
+)
+@NamedEntityGraph(
+        name = "Car.withDetails",
+        attributeNodes = {
+                @NamedAttributeNode("owner"),
+                @NamedAttributeNode("brand"),
+                @NamedAttributeNode("carType")
+        }
+)
 public class Car extends BaseEntity {
 
     @Column(nullable = false, length = 100)
