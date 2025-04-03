@@ -1,6 +1,5 @@
 package com.vaccinex.service;
 
-import com.vaccinex.dto.paging.PagingResponse;
 import com.vaccinex.dto.request.VaccineCreateRequest;
 import com.vaccinex.dto.request.VaccineUpdateRequest;
 import com.vaccinex.dto.response.VaccineDTO;
@@ -10,9 +9,9 @@ import com.vaccinex.pojo.Vaccine;
 import java.util.List;
 
 public interface VaccineService extends BaseService<Vaccine, Integer> {
-    PagingResponse getAllVaccines(Integer currentPage, Integer pageSize);
+    List<VaccineResponseDTO> getAllVaccines();
 
-    PagingResponse getAllVaccineActive(Integer currentPage, Integer pageSize);
+    List<VaccineResponseDTO> getAllVaccineActive();
 
     VaccineResponseDTO undeleteVaccine(Integer vaccineID);
 
@@ -20,7 +19,7 @@ public interface VaccineService extends BaseService<Vaccine, Integer> {
 
     VaccineResponseDTO updateVaccine(VaccineUpdateRequest vaccineUpdateRequest, int vaccineID);
 
-    PagingResponse searchVaccines(Integer currentPage, Integer pageSize, String name, String purpose, String price, Integer minAge, Integer maxAge, String sortBy);
+    List<VaccineResponseDTO> searchVaccines(String name, String purpose, String price, Integer minAge, Integer maxAge);
 
     VaccineResponseDTO deleteVaccine(Integer vaccineID);
 
@@ -31,5 +30,4 @@ public interface VaccineService extends BaseService<Vaccine, Integer> {
     List<VaccineResponseDTO> getVaccinesV2();
 
     List<VaccineResponseDTO> getVaccinesActiveV2();
-
 }

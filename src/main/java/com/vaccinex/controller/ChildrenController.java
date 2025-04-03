@@ -18,7 +18,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 @Path("/children")
 @Tag(name = "Children", description = "Children Management Operations")

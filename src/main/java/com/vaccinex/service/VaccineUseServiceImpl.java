@@ -4,226 +4,148 @@ import com.vaccinex.base.exception.ElementExistException;
 import com.vaccinex.base.exception.ElementNotFoundException;
 import com.vaccinex.base.exception.UnchangedStateException;
 import com.vaccinex.dao.VaccineUseDao;
-import com.vaccinex.dto.paging.PagingResponse;
 import com.vaccinex.dto.request.VaccineUseCreateRequest;
 import com.vaccinex.dto.request.VaccineUseUpdateRequest;
 import com.vaccinex.dto.response.VaccineUseResponseDTO;
 import com.vaccinex.mapper.VaccineUseMapper;
 import com.vaccinex.pojo.VaccineUse;
-import com.vaccinex.utils.VaccineUseSpecification;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Stateless
 public class VaccineUseServiceImpl extends BaseServiceImpl<VaccineUse, Integer> implements VaccineUseService {
 
-    private final VaccineUseDao vaccineUseRepository;
-    private final VaccineUseMapper vaccineUseMapper;
+    @Inject
+    private VaccineUseDao vaccineUseRepository;
 
-    public VaccineUseServiceImpl(VaccineUseDao vaccineUseRepository, VaccineUseMapper vaccineUseMapper) {
-        super(vaccineUseRepository);
-        this.vaccineUseRepository = vaccineUseRepository;
-        this.vaccineUseMapper = vaccineUseMapper;
+    @Inject
+    private VaccineUseMapper vaccineUseMapper;
+
+    public VaccineUseServiceImpl() {
+        super(VaccineUse.class);
     }
 
     @Override
-    public PagingResponse getAllPurposes(Integer currentPage, Integer pageSize) {
-        Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
-
-        var pageData = vaccineUseRepository.findAll(pageable);
-
-        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
-                .code("Success")
-                .message("Lấy danh sách mục đích sử dụng vaccine với phân trang thành công")
-                .currentPage(currentPage)
-                .pageSize(pageSize)
-                .totalElements(pageData.getTotalElements())
-                .totalPages(pageData.getTotalPages())
-                .data(pageData.getContent().stream()
-                        .map(vaccineUseMapper::vaccineUseToVaccineUseResponseDTO)
-                        .toList())
-                .build() :
-                PagingResponse.builder()
-                        .code("Failed")
-                        .message("Lấy danh sách mục đích sử dụng vaccine với phân trang không thành công")
-                        .currentPage(currentPage)
-                        .pageSize(pageSize)
-                        .totalElements(pageData.getTotalElements())
-                        .totalPages(pageData.getTotalPages())
-                        .data(pageData.getContent().stream()
-                                .map(vaccineUseMapper::vaccineUseToVaccineUseResponseDTO)
-                                .toList())
-                        .build();
+    public List<VaccineUseResponseDTO> getAllPurposes() {
+        return vaccineUseRepository.findAll().stream()
+                .map(vaccineUseMapper::vaccineUseToVaccineUseResponseDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public PagingResponse getAllPurposesActive(Integer currentPage, Integer pageSize) {
-        Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
-
-        var pageData = vaccineUseRepository.findAllByDeletedFalse(pageable);
-
-        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
-                .code("Success")
-                .message("Lấy danh sách mục đích sử dụng vaccine đang hoạt động với phân trang thành công")
-                .currentPage(currentPage)
-                .pageSize(pageSize)
-                .totalElements(pageData.getTotalElements())
-                .totalPages(pageData.getTotalPages())
-                .data(pageData.getContent().stream()
-                        .map(vaccineUseMapper::vaccineUseToVaccineUseResponseDTO)
-                        .toList())
-                .build() :
-                PagingResponse.builder()
-                        .code("Failed")
-                        .message("Lấy danh sách mục đích sử dụng vaccine đang hoạt động với phân trang không thành công")
-                        .currentPage(currentPage)
-                        .pageSize(pageSize)
-                        .totalElements(pageData.getTotalElements())
-                        .totalPages(pageData.getTotalPages())
-                        .data(pageData.getContent().stream()
-                                .map(vaccineUseMapper::vaccineUseToVaccineUseResponseDTO)
-                                .toList())
-                        .build();
+    public List<VaccineUseResponseDTO> getAllPurposesActive() {
+        return vaccineUseRepository.findByDeletedIsFalse().stream()
+                .map(vaccineUseMapper::vaccineUseToVaccineUseResponseDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<VaccineUseResponseDTO> getPurposes() {
-        return vaccineUseRepository.findAll().stream().map(vaccineUseMapper::vaccineUseToVaccineUseResponseDTO).collect(Collectors.toList());
+        return vaccineUseRepository.findAll().stream()
+                .map(vaccineUseMapper::vaccineUseToVaccineUseResponseDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<VaccineUseResponseDTO> getPurposesActive() {
-        return vaccineUseRepository.findByDeletedIsFalse().stream().map(vaccineUseMapper::vaccineUseToVaccineUseResponseDTO).collect(Collectors.toList());
+        return vaccineUseRepository.findByDeletedIsFalse().stream()
+                .map(vaccineUseMapper::vaccineUseToVaccineUseResponseDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
     public VaccineUseResponseDTO createPurpose(VaccineUseCreateRequest vaccineUseCreateRequest) {
-        VaccineUse checkExist = vaccineUseRepository.findPurposeByName(vaccineUseCreateRequest.getName());
-        if (checkExist != null) {
-            throw new ElementExistException("Đã tồn tại một mục đích sử dụng vaccine với tên " + vaccineUseCreateRequest.getName());
+        // Check if a purpose with the same name already exists
+        VaccineUse existingPurpose = vaccineUseRepository.findByName(vaccineUseCreateRequest.getName());
+        if (existingPurpose != null) {
+            throw new ElementExistException("Purpose already exists with name: " + vaccineUseCreateRequest.getName());
         }
+
+        // Create new VaccineUse
         VaccineUse vaccineUse = VaccineUse.builder()
                 .name(vaccineUseCreateRequest.getName())
                 .description(vaccineUseCreateRequest.getDescription())
                 .build();
-        return vaccineUseMapper.vaccineUseToVaccineUseResponseDTO(vaccineUseRepository.save(vaccineUse));
+
+        // Save and convert to DTO
+        vaccineUse = vaccineUseRepository.save(vaccineUse);
+        return vaccineUseMapper.vaccineUseToVaccineUseResponseDTO(vaccineUse);
     }
 
     @Override
+    @Transactional
     public VaccineUseResponseDTO updatePurpose(VaccineUseUpdateRequest vaccineUseUpdateRequest, int purposeID) {
-        VaccineUse vaccineUse = vaccineUseRepository.findPurposeById(purposeID);
-        if (vaccineUse != null) {
-            if (vaccineUseUpdateRequest.getName() != null) {
-                if (!vaccineUse.getName().equals(vaccineUseUpdateRequest.getName())) {
-                    VaccineUse checkExist = vaccineUseRepository.findPurposeByName(vaccineUseUpdateRequest.getName());
-                    if (checkExist != null) {
-                        throw new ElementExistException("Tên mục đích sử dụng vaccine đã tồn tại với tên: \"" + vaccineUseUpdateRequest.getName() + "\"");
-                    }
-                }
-                vaccineUse.setName(vaccineUseUpdateRequest.getName());
+        // Find the existing purpose
+        VaccineUse vaccineUse = vaccineUseRepository.findById(purposeID)
+                .orElseThrow(() -> new ElementNotFoundException("Purpose not found with ID: " + purposeID));
+
+        // Check if new name already exists (if name is being changed)
+        if (StringUtils.isNotBlank(vaccineUseUpdateRequest.getName())) {
+            VaccineUse existingWithName = vaccineUseRepository.findByName(vaccineUseUpdateRequest.getName());
+            if (existingWithName != null && !existingWithName.getId().equals(purposeID)) {
+                throw new ElementExistException("Purpose already exists with name: " + vaccineUseUpdateRequest.getName());
             }
-            if (vaccineUseUpdateRequest.getDescription() != null) {
-                vaccineUse.setDescription(vaccineUseUpdateRequest.getDescription());
-            }
-            return vaccineUseMapper.vaccineUseToVaccineUseResponseDTO(vaccineUseRepository.save(vaccineUse));
+            vaccineUse.setName(vaccineUseUpdateRequest.getName());
         }
-        return null;
+
+        // Update description if provided
+        if (StringUtils.isNotBlank(vaccineUseUpdateRequest.getDescription())) {
+            vaccineUse.setDescription(vaccineUseUpdateRequest.getDescription());
+        }
+
+        // Save and convert to DTO
+        vaccineUse = vaccineUseRepository.save(vaccineUse);
+        return vaccineUseMapper.vaccineUseToVaccineUseResponseDTO(vaccineUse);
     }
 
     @Override
-    public VaccineUseResponseDTO undeletePurpose(Integer purposeID) {
-        VaccineUse vaccineUse = vaccineUseRepository.findPurposeById(purposeID);
-        if (vaccineUse == null) {
-            throw new ElementNotFoundException("Không tìm thấy mục đích sử dụng vaccine");
-        }
-        if (!vaccineUse.isDeleted()) {
-            throw new UnchangedStateException("Mục đích sử dụng vaccine chưa được xóa");
-        }
-        vaccineUse.setDeleted(false);
-        return vaccineUseMapper.vaccineUseToVaccineUseResponseDTO(vaccineUseRepository.save(vaccineUse));
-    }
-
-    @Override
+    @Transactional
     public VaccineUseResponseDTO deletePurpose(Integer purposeID) {
-        VaccineUse vaccineUse = vaccineUseRepository.findPurposeById(purposeID);
-        if (vaccineUse == null) {
-            throw new ElementNotFoundException("Không tìm thấy mục đích sử dụng vaccine");
-        }
+        // Find the existing purpose
+        VaccineUse vaccineUse = vaccineUseRepository.findById(purposeID)
+                .orElseThrow(() -> new ElementNotFoundException("Purpose not found with ID: " + purposeID));
+
+        // Soft delete
         vaccineUse.setDeleted(true);
-        return vaccineUseMapper.vaccineUseToVaccineUseResponseDTO(vaccineUseRepository.save(vaccineUse));
+        vaccineUse = vaccineUseRepository.save(vaccineUse);
+        return vaccineUseMapper.vaccineUseToVaccineUseResponseDTO(vaccineUse);
     }
 
     @Override
-    public PagingResponse searchVaccineUses(Integer currentPage, Integer pageSize, String name, String sortBy) {
-        Pageable pageable;
+    @Transactional
+    public VaccineUseResponseDTO undeletePurpose(Integer purposeID) {
+        // Find the existing purpose
+        VaccineUse vaccineUse = vaccineUseRepository.findById(purposeID)
+                .orElseThrow(() -> new ElementNotFoundException("Purpose not found with ID: " + purposeID));
 
-        Specification<VaccineUse> spec = Specification.where(null);
-
-        List<String> keys = new ArrayList<>();
-        List<String> values = new ArrayList<>();
-
-        String searchName = "";
-        if (StringUtils.hasText(name)) {
-            searchName = name;
-        }
-        keys.add("name");
-        values.add(searchName);
-
-        if(keys.size() == values.size()) {
-            for(int i = 0; i < keys.size(); i++) {
-                String field = keys.get(i);
-                String value = values.get(i);
-                Specification<VaccineUse> newSpec = VaccineUseSpecification.searchByField(field, value);
-                if(newSpec != null) {
-                    spec = spec.and(newSpec);
-                }
-            }
+        // Check if already not deleted
+        if (!vaccineUse.isDeleted()) {
+            throw new UnchangedStateException("Purpose is not deleted");
         }
 
-        List<Sort.Order> orders = new ArrayList<>();
-        if (StringUtils.hasText(sortBy)) {
-            String sortByLower = sortBy.trim().toLowerCase();
-
-            boolean hasNameASC = sortByLower.contains("nameasc");
-            boolean hasNameDESC = sortByLower.contains("namedesc");
-
-            if (hasNameASC ^ hasNameDESC) {
-                orders.add(hasNameASC ? Sort.Order.asc("name") : Sort.Order.desc("name"));
-            }
-
-        }
-
-        Sort sort = orders.isEmpty() ? Sort.unsorted() : Sort.by(orders);
-
-        pageable = PageRequest.of(currentPage - 1, pageSize, sort);
-
-        var pageData = vaccineUseRepository.findAll(spec, pageable);
-
-        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
-                .code("Success")
-                .message("Lấy danh sách mục đích sử dụng vaccine với bộ lọc, sắp xếp và phân trang thành công")
-                .currentPage(currentPage)
-                .pageSize(pageSize)
-                .totalElements(pageData.getTotalElements())
-                .totalPages(pageData.getTotalPages())
-                .data(pageData.getContent().stream()
-                        .map(vaccineUseMapper::vaccineUseToVaccineUseResponseDTO)
-                        .toList())
-                .build() :
-                PagingResponse.builder()
-                        .code("Failed")
-                        .message("Lấy danh sách mục đích sử dụng vaccine với bộ lọc, sắp xếp và phân trang không thành công")
-                        .currentPage(currentPage)
-                        .pageSize(pageSize)
-                        .totalElements(pageData.getTotalElements())
-                        .totalPages(pageData.getTotalPages())
-                        .data(pageData.getContent().stream()
-                                .map(vaccineUseMapper::vaccineUseToVaccineUseResponseDTO)
-                                .toList())
-                        .build();
+        // Restore
+        vaccineUse.setDeleted(false);
+        vaccineUse = vaccineUseRepository.save(vaccineUse);
+        return vaccineUseMapper.vaccineUseToVaccineUseResponseDTO(vaccineUse);
     }
 
+    @Override
+    public List<VaccineUseResponseDTO> searchVaccineUses(String name) {
+        // If no name provided, return all active purposes
+        if (StringUtils.isBlank(name)) {
+            return getAllPurposesActive();
+        }
+
+        // Search by name (case-insensitive)
+        return vaccineUseRepository.findByDeletedIsFalse().stream()
+                .filter(vaccineUse -> StringUtils.containsIgnoreCase(vaccineUse.getName(), name))
+                .map(vaccineUseMapper::vaccineUseToVaccineUseResponseDTO)
+                .collect(Collectors.toList());
+    }
 }

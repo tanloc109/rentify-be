@@ -1,9 +1,9 @@
 package com.vaccinex.dao;
 
 import com.vaccinex.base.dao.AbstractDao;
+import com.vaccinex.pojo.Transaction;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.TypedQuery;
-import jakarta.transaction.Transaction;
 import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
@@ -39,7 +39,7 @@ public class TransactionDaoImpl extends AbstractDao<Transaction, Integer> implem
     }
 
     @Override
-    public List<Transaction> findByDoctorIdAndDateAfterAndDateBefore(Integer doctorId, LocalDateTime dateAfter, LocalDateTime dateBefore) {
+    public List<Transaction> findTransactionsByDoctorIdAndDateRange(Integer doctorId, LocalDateTime dateAfter, LocalDateTime dateBefore) {
         TypedQuery<Transaction> query = entityManager.createQuery(
                 "SELECT t FROM Transaction t WHERE t.doctor.id = :doctorId AND t.date > :dateAfter AND t.date < :dateBefore",
                 Transaction.class);
@@ -51,12 +51,19 @@ public class TransactionDaoImpl extends AbstractDao<Transaction, Integer> implem
 
     @Override
     @Transactional
-    public Transaction save(Transaction transaction) {
+    public Transaction saveTransaction(Transaction transaction) {
         if (transaction.getId() == null) {
             entityManager.persist(transaction);
             return transaction;
         } else {
             return entityManager.merge(transaction);
         }
+    }
+
+    // Implementing save method from AbstractDao with a more generic implementation
+    @Override
+    @Transactional
+    public Transaction save(Transaction transaction) {
+        return saveTransaction(transaction);
     }
 }

@@ -1,13 +1,13 @@
 package com.vaccinex.thirdparty.payment;
-import com.sba301.vaccinex.utils.VNPayUtil;
+
+import jakarta.ejb.Stateless;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import lombok.Value;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-@Configuration
+@Stateless
 public class VNPAYConfig {
 
     @Getter
@@ -33,6 +33,10 @@ public class VNPAYConfig {
 
     @Value("${payment.vnPay.orderType}")
     private String orderType;
+
+    public VNPAYConfig(String vnpTmnCode) {
+        vnp_TmnCode = vnpTmnCode;
+    }
 
     public Map<String, String> getVNPayConfig() {
         Map<String, String> vnpParamsMap = new HashMap<>();

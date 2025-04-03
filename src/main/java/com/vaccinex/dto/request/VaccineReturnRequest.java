@@ -1,6 +1,6 @@
 package com.vaccinex.dto.request;
 
-import com.sba301.vaccinex.pojo.enums.Shift;
+import com.vaccinex.pojo.enums.Shift;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

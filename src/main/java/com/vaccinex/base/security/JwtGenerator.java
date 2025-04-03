@@ -10,6 +10,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.vaccinex.base.config.AppConfig;
 import com.vaccinex.base.contants.ApplicationMessage;
 import com.vaccinex.base.exception.UnauthorizedException;
+import com.vaccinex.pojo.enums.EnumTokenType;
 import jakarta.enterprise.context.Dependent;
 import jakarta.ws.rs.ServerErrorException;
 import jakarta.ws.rs.core.Response;
@@ -56,4 +57,7 @@ public class JwtGenerator {
     }
 
 
+    public String getEmailFromJwt(String token, EnumTokenType enumTokenType) {
+        return null;
+    }
 }

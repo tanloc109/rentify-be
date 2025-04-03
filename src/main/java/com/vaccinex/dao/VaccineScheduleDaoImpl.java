@@ -73,13 +73,11 @@ public class VaccineScheduleDaoImpl extends AbstractDao<VaccineSchedule, Integer
     }
 
     @Override
-    public List<VaccineSchedule> findByCustomer(User customer, int page, int size) {
+    public List<VaccineSchedule> findByCustomer(User customer) {
         TypedQuery<VaccineSchedule> query = entityManager.createQuery(
                 "SELECT vs FROM VaccineSchedule vs WHERE vs.customer = :customer", 
                 VaccineSchedule.class);
         query.setParameter("customer", customer);
-        query.setFirstResult((page - 1) * size);
-        query.setMaxResults(size);
         return query.getResultList();
     }
 

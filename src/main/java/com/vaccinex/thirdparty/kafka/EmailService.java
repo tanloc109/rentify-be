@@ -1,17 +1,13 @@
 package com.vaccinex.thirdparty.kafka;
 
-import com.sba301.vaccinex.dto.internal.kafka.ScheduleMailReminderDTO;
+import com.vaccinex.dto.internal.ScheduleMailReminderDTO;
+import jakarta.ejb.Stateless;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.stereotype.Service;
-import org.thymeleaf.context.Context;
-import org.thymeleaf.spring6.SpringTemplateEngine;
 
-@Service
+@Stateless
 @RequiredArgsConstructor
 @Slf4j
 public class EmailService {

@@ -1,19 +1,20 @@
 package com.vaccinex.service;
 
+import com.vaccinex.base.exception.BadRequestException;
 import com.vaccinex.base.exception.IdNotFoundException;
 import com.vaccinex.dao.*;
-import com.vaccinex.dto.paging.BatchPagingResponse;
-import com.vaccinex.dto.paging.PagingRequest;
+import com.vaccinex.dto.response.BatchResponse;
 import com.vaccinex.dto.request.BatchCreateRequest;
 import com.vaccinex.dto.request.BatchUpdateRequest;
 import com.vaccinex.dto.request.VaccineReturnRequest;
 import com.vaccinex.dto.response.BatchQuantityDTO;
 import com.vaccinex.pojo.Batch;
 import com.vaccinex.pojo.BatchTransaction;
+import com.vaccinex.pojo.Transaction;
 import com.vaccinex.pojo.Vaccine;
 import com.vaccinex.pojo.enums.Shift;
-import com.vaccinex.utils.PaginationUtil;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -28,11 +29,20 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class BatchServiceImpl implements BatchService {
 
-    private final BatchDao batchRepository;
-    private final BatchTransactionDao batchTransactionRepository;
-    private final VaccineDao vaccineRepository;
-    private final VaccineScheduleDao vaccineScheduleRepository;
-    private final TransactionDao transactionRepository;
+    @Inject
+    private BatchDao batchRepository;
+
+    @Inject
+    private BatchTransactionDao batchTransactionRepository;
+
+    @Inject
+    private VaccineDao vaccineRepository;
+
+    @Inject
+    private VaccineScheduleDao vaccineScheduleRepository;
+
+    @Inject
+    private TransactionDao transactionRepository;
 
     private Vaccine getVaccine(Integer vaccineId) {
         return vaccineRepository
@@ -41,17 +51,42 @@ public class BatchServiceImpl implements BatchService {
     }
 
     @Override
-    public MappingJacksonValue getAllBatches(PagingRequest request) {
-        Pageable pageable = PaginationUtil.getPageable(request);
-        Map<String, String> maps = request.getFilters();
-        maps.remove("pageNo");
-        maps.remove("pageSize");
-        maps.remove("params");
-        maps.remove("sortBy");
-        Specification<Batch> specification = BatchPagingResponse.filterByFields(maps);
-        Page<Batch> batches = batchRepository.findAll(specification, pageable);
-        List<BatchPagingResponse> mappedDTO = batches.getContent().stream().map(BatchPagingResponse::fromEntity).toList();
-        return PaginationUtil.getPagedMappingJacksonValue(request, batches, mappedDTO, "Lấy tất cả lô vaccine");
+    public List<BatchResponse> getAllBatches() {
+        List<Batch> batches = batchRepository.findAll();
+        return batches.stream().map(BatchResponse::fromEntity).toList();
+    }
+
+    private boolean applyFilters(Batch batch, Map<String, String> filters) {
+        // Implement your filtering logic here based on the filters map
+        // Example:
+        for (Map.Entry<String, String> entry : filters.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            if (value == null || value.isEmpty()) {
+                continue;
+            }
+
+            switch (key) {
+                case "batchCode":
+                    if (!batch.getBatchCode().toLowerCase().contains(value.toLowerCase())) {
+                        return false;
+                    }
+                    break;
+                case "vaccineId":
+                    if (!batch.getVaccine().getId().toString().equals(value)) {
+                        return false;
+                    }
+                    break;
+                case "vaccineName":
+                    if (!batch.getVaccine().getName().toLowerCase().contains(value.toLowerCase())) {
+                        return false;
+                    }
+                    break;
+                // Add more filter conditions as needed
+            }
+        }
+        return true;
     }
 
     @Override
@@ -59,7 +94,7 @@ public class BatchServiceImpl implements BatchService {
         return batchRepository
                 .findByIdAndDeletedIsFalse(id)
                 .orElseThrow(
-                        () -> new EntityNotFoundException("Không tìm thấy lô vaccine với ID " + id)
+                        () -> new IdNotFoundException("Batch with ID " + id + " not found")
                 );
     }
 
@@ -153,23 +188,23 @@ public class BatchServiceImpl implements BatchService {
     public void returnVaccine(VaccineReturnRequest request) {
         List<Transaction> transactions;
         LocalDate today = LocalDate.now();
-        if (request.getShift() == Shift.AFTERNOON) {
-            transactions = transactionRepository.findByDoctorIdAndDateAfterAndDateBefore(
+        if (request.getShift().equals(Shift.AFTERNOON)) {
+            transactions = transactionRepository.findTransactionsByDoctorIdAndDateRange(
                     request.getDoctorId(),
                     today.atTime(12, 1),
                     today.atTime(20, 0)
             );
             if (transactions.isEmpty()) {
-                throw new BadRequestException("Không tìm thấy lần xuất vaccine nào trong ca làm việc buổi chiều của bác sĩ ID " + request.getDoctorId());
+                throw new BadRequestException("No vaccine transactions found in the afternoon shift for doctor ID " + request.getDoctorId());
             }
         } else {
-            transactions = transactionRepository.findByDoctorIdAndDateAfterAndDateBefore(
+            transactions = transactionRepository.findTransactionsByDoctorIdAndDateRange(
                     request.getDoctorId(),
                     today.atTime(8, 0),
                     today.atTime(12, 0)
             );
             if (transactions.isEmpty()) {
-                throw new BadRequestException("Không tìm thấy lần xuất vaccine nào trong ca làm việc buổi sáng của bác sĩ ID " + request.getDoctorId());
+                throw new BadRequestException("No vaccine transactions found in the morning shift for doctor ID " + request.getDoctorId());
             }
         }
         List<BatchTransaction> batchTransactions = transactions.stream().flatMap(t -> t.getBatchTransactions().stream()).toList();
@@ -177,7 +212,7 @@ public class BatchServiceImpl implements BatchService {
         List<Batch> modifiedBatches = new ArrayList<>();
         for (VaccineReturnRequest.VaccinesQuantity vq : request.getReturned()) {
             Vaccine vaccine = vaccineRepository.findById(vq.getVaccineId()).orElseThrow(
-                    () -> new BadRequestException("Không tìm thấy vaccine với ID " + vq.getVaccineId())
+                    () -> new BadRequestException("Vaccine with ID " + vq.getVaccineId() + " not found")
             );
 
             // Filter and sort batch transactions by expiration DESC
@@ -198,23 +233,31 @@ public class BatchServiceImpl implements BatchService {
                     break;
                 }
 
-                // Ensure we don’t exceed remaining
-                int addBack = Math.max(
-                        Math.max(quantityToReturn, remaining)
-                        , batch.getBatchSize() - batch.getQuantity()
+                // Ensure we don't exceed remaining
+                int addBack = Math.min(
+                        Math.min(quantityToReturn, remaining),
+                        batch.getBatchSize() - batch.getQuantity()
                 );
                 bt.setRemaining(bt.getRemaining() - addBack);
                 batch.setQuantity(batch.getQuantity() + addBack);
                 modifiedBTs.add(bt);
+                modifiedBatches.add(batch);
                 quantityToReturn -= addBack;
             }
 
             // This ensures the doctor is not returning more than they initially took.
             if (quantityToReturn > 0) {
-                throw new BadRequestException("Số lượng trả về vượt quá số lượng đã lấy cho vaccine ID " + vq.getVaccineId());
+                throw new BadRequestException("Return quantity exceeds what was taken for vaccine ID " + vq.getVaccineId());
             }
         }
-        batchRepository.saveAll(modifiedBatches);
-        batchTransactionRepository.saveAll(modifiedBTs);
+
+        // Save each batch and transaction individually if saveAll is not available
+        for (Batch batch : modifiedBatches) {
+            batchRepository.save(batch);
+        }
+
+        for (BatchTransaction bt : modifiedBTs) {
+            batchTransactionRepository.save(bt);
+        }
     }
 }

@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Abstract implementation of the GenericDao interface
@@ -70,5 +71,13 @@ public abstract class AbstractDao<T, ID> implements GenericDao<T, ID> {
         CriteriaQuery<Long> cq = cb.createQuery(Long.class);
         cq.select(cb.count(cq.from(entityClass)));
         return entityManager.createQuery(cq).getSingleResult();
+    }
+
+    @Override
+    @Transactional
+    public List<T> saveAll(List<T> entities) {
+        return entities.stream()
+                .map(this::save)
+                .collect(Collectors.toList());
     }
 }

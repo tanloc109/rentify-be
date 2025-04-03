@@ -70,6 +70,16 @@ public class VaccineUseDaoImpl extends AbstractDao<VaccineUse, Integer> implemen
     }
 
     @Override
+    public VaccineUse findByName(String name) {
+        TypedQuery<VaccineUse> query = entityManager.createQuery(
+                "SELECT vu FROM VaccineUse vu WHERE vu.name = :name",
+                VaccineUse.class);
+        query.setParameter("name", name);
+        List<VaccineUse> results = query.getResultList();
+        return results.isEmpty() ? null : results.get(0);
+    }
+
+    @Override
     @Transactional
     public VaccineUse save(VaccineUse vaccineUse) {
         if (vaccineUse.getId() == null) {

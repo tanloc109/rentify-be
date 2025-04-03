@@ -1,6 +1,6 @@
 package com.vaccinex.dto.request;
 
-import com.sba301.vaccinex.pojo.enums.ServiceType;
+import com.vaccinex.pojo.enums.ServiceType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

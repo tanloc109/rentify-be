@@ -15,4 +15,5 @@ public interface VaccineUseDao extends GenericDao<VaccineUse, Integer> {
     VaccineUse findPurposeByName(String name);
     List<VaccineUse> findByDeletedIsFalse();
     List<VaccineUse> findAllByIdInAndDeletedFalse(List<Integer> vaccineUseIds);
+    VaccineUse findByName(String name);
 }

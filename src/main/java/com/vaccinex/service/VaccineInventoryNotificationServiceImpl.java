@@ -1,9 +1,11 @@
 package com.vaccinex.service;
 
+import com.vaccinex.dao.BatchDao;
 import com.vaccinex.dao.VaccineScheduleDao;
 import com.vaccinex.dto.response.BatchWithRemaining;
 import com.vaccinex.dto.response.VaccineInventoryAlert;
 import com.vaccinex.dto.response.VaccineStockRequirement;
+import com.vaccinex.pojo.Batch;
 import com.vaccinex.pojo.Vaccine;
 import com.vaccinex.pojo.VaccineSchedule;
 import com.vaccinex.pojo.enums.VaccineScheduleStatus;

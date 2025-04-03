@@ -15,11 +15,11 @@ import com.vaccinex.pojo.*;
 import com.vaccinex.pojo.enums.OrderStatus;
 import com.vaccinex.pojo.enums.ServiceType;
 import com.vaccinex.thirdparty.refund.RefundTransaction;
-import com.vaccinex.thirdparty.refund.RefundTransactionRepository;
+import com.vaccinex.thirdparty.refund.RefundTransactionDao;
 import com.vaccinex.thirdparty.refund.VNPayRefundService;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -28,21 +28,38 @@ import java.time.ZoneId;
 import java.util.*;
 
 @Stateless
-@RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
-    private final OrderDao orderRepository;
+    @Inject
+    private OrderDao orderRepository;
 
-    private final AccountService accountService;
-    private final ChildrenService childrenService;
-    private final ComboService comboService;
-    private final VaccineService vaccineService;
-    private final PaymentService paymentService;
-    private final VNPayRefundService vnPayRefundService;
-    private final VaccineScheduleService vaccineScheduleService;
-    private final VaccineScheduleDao vaccineScheduleRepository;
-    private final PaymentDao paymentRepository;
-    private final RefundTransactionRepository refundTransactionRepository;
+    @Inject
+    private AccountService accountService;
+
+    @Inject
+    private ChildrenService childrenService;
+
+    @Inject
+    private ComboService comboService;
+
+    @Inject
+    private VaccineService vaccineService;
+
+    @Inject
+    private PaymentService paymentService;
+    private VNPayRefundService vnPayRefundService;
+
+    @Inject
+    private VaccineScheduleService vaccineScheduleService;
+
+    @Inject
+    private VaccineScheduleDao vaccineScheduleRepository;
+
+    @Inject
+    private PaymentDao paymentRepository;
+
+    @Inject
+    private RefundTransactionDao refundTransactionRepository;
 
     @Override
     public Order findById(Integer id) {

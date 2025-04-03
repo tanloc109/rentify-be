@@ -1,4 +1,4 @@
-package com.vaccinex.utils;
+package com.vaccinex.thirdparty.payment;
 
 import jakarta.servlet.http.HttpServletRequest;
 

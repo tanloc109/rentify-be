@@ -63,7 +63,7 @@ public class Child extends BaseEntity {
 
     public int getAge() {
         if (dob == null) {
-            return 0; // hoặc có thể throw exception nếu cần
+            return 0;
         }
         return Period.between(dob, LocalDate.now()).getYears();
     }

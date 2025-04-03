@@ -2,6 +2,7 @@ package com.vaccinex.service;
 
 import com.vaccinex.base.exception.BadRequestException;
 import com.vaccinex.base.exception.IdNotFoundException;
+import com.vaccinex.base.security.JwtGenerator;
 import com.vaccinex.dao.ChildrenDao;
 import com.vaccinex.dao.UserDao;
 import com.vaccinex.dao.VaccineComboDao;
@@ -35,7 +36,7 @@ public class ChildrenServiceImpl implements ChildrenService {
 
     private final ChildrenDao childRepository;
     private final UserDao userRepository;
-    private final JWTToken jwtService;
+    private final JwtGenerator jwtService;
     private final VaccineScheduleDao vaccineScheduleRepository;
     private final VaccineComboDao vaccineComboRepository;
 
@@ -95,7 +96,7 @@ public class ChildrenServiceImpl implements ChildrenService {
     @Override
     public ChildrenResponseDTO update(Integer childId, ChildrenRequestDTO dto, HttpServletRequest request) {
         Child child = childRepository.findByIdAndDeletedIsFalse(childId)
-                .orElseThrow(() -> new IdNotFound("Cannot find child with id: " + childId));
+                .orElseThrow(() -> new IdNotFoundException("Cannot find child with id: " + childId));
         String token = request.getHeader("Authorization");
         if (token.startsWith("Bearer ")) {
             token = token.substring(7);
@@ -122,7 +123,7 @@ public class ChildrenServiceImpl implements ChildrenService {
     @Override
     public void deleteById(Integer childId) {
         Child child = childRepository.findByIdAndDeletedIsFalse(childId)
-                .orElseThrow(() -> new IdNotFound("Cannot find child with id: " + childId));
+                .orElseThrow(() -> new IdNotFoundException("Cannot find child with id: " + childId));
         child.setDeleted(true);
         childRepository.save(child);
     }

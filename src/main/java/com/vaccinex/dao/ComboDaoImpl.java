@@ -89,4 +89,11 @@ public class ComboDaoImpl extends AbstractDao<Combo, Integer> implements ComboDa
             return entityManager.merge(combo);
         }
     }
+
+    @Override
+    public List<Combo> findAllByDeletedIsFalse() {
+        TypedQuery<Combo> query = entityManager.createQuery(
+                "SELECT c FROM Combo c WHERE c.deleted = false", Combo.class);
+        return query.getResultList();
+    }
 }

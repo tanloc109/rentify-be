@@ -1,24 +1,24 @@
 package com.vaccinex.thirdparty.refund;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sba301.vaccinex.exception.BadRequestException;
-import com.sba301.vaccinex.pojo.Order;
-import com.sba301.vaccinex.pojo.Payment;
-import com.sba301.vaccinex.pojo.VaccineSchedule;
-import com.sba301.vaccinex.pojo.enums.VaccineScheduleStatus;
-import com.sba301.vaccinex.repository.PaymentRepository;
-import com.sba301.vaccinex.repository.VaccineScheduleRepository;
+import com.vaccinex.dao.PaymentDao;
+import com.vaccinex.dao.VaccineScheduleDao;
+import com.vaccinex.base.exception.BadRequestException;
+import com.vaccinex.pojo.Order;
+import com.vaccinex.pojo.Payment;
+import com.vaccinex.pojo.VaccineSchedule;
+import com.vaccinex.pojo.enums.VaccineScheduleStatus;
 import com.vaccinex.thirdparty.payment.VNPAYConfig;
-import com.sba301.vaccinex.utils.VNPayUtil;
+import com.vaccinex.thirdparty.payment.VNPayUtil;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
@@ -26,16 +26,30 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-@Service
-@RequiredArgsConstructor
+@Stateless
 public class VNPayRefundService {
 
-    private final VNPAYConfig vnPayConfig;
-    private final PaymentRepository paymentRepository;
-    private final RefundTransactionRepository refundTransactionRepository;
-    private final VaccineScheduleRepository vaccineScheduleRepository;
-    private final RestTemplate restTemplate = new RestTemplate();
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Inject
+    private VNPAYConfig vnPayConfig;
+
+    @Inject
+    private PaymentDao paymentRepository;
+
+    @Inject
+    private RefundTransactionDao refundTransactionRepository;
+
+    @Inject
+    private VaccineScheduleDao vaccineScheduleRepository;
+
+    private Client client;
+
+    @Inject
+    private ObjectMapper objectMapper;
+
+    public VNPayRefundService() {
+        this.client = ClientBuilder.newClient();
+        this.objectMapper = new ObjectMapper();
+    }
 
     @Data
     @Builder
@@ -60,11 +74,11 @@ public class VNPayRefundService {
     public RefundResponse processRefund(Integer paymentId, Double amount, String refundReason, String createdBy) {
         // 1. Find the payment
         Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new BadRequestException("Không tìm thấy thanh toán bằng ID: " + paymentId));
+                .orElseThrow(() -> new BadRequestException("Payment not found with ID: " + paymentId));
 
         // 2. Validate refund amount
         if (amount > payment.getAmount()) {
-            throw new BadRequestException("Số tiền hoàn lại không được vượt quá số tiền thanh toán ban đầu");
+            throw new BadRequestException("Refund amount cannot exceed the original payment amount");
         }
 
         // 3. Prepare VNPay refund parameters
@@ -85,11 +99,11 @@ public class VNPayRefundService {
         double amount = 0;
 
         List<VaccineSchedule> bookings = order.getSchedules().stream()
-        .filter(booking -> booking.getStatus() == VaccineScheduleStatus.PLANNED)
-        .toList();
+                .filter(booking -> booking.getStatus() == VaccineScheduleStatus.PLANNED)
+                .toList();
 
         if (bookings.isEmpty()) {
-            throw new BadRequestException("Không có cuộc hẹn trong tương lai để hoàn tiền");
+            throw new BadRequestException("No future appointments available for refund");
         }
 
         List<VaccineSchedule> updatedBookings = new ArrayList<>();
@@ -115,9 +129,12 @@ public class VNPayRefundService {
                 }
             }
         }
-        System.out.println("tra lai:" + amount);
+        System.out.println("Refund amount:" + amount);
 
-        vaccineScheduleRepository.saveAll(updatedBookings);
+        for (VaccineSchedule updatedBooking : updatedBookings) {
+            vaccineScheduleRepository.save(updatedBooking);
+        }
+
         return processRefund(order.getPayments().getFirst().getId(), amount, "CANCEL BOOKING", "VaccineX");
     }
 
@@ -129,7 +146,7 @@ public class VNPayRefundService {
                 .toList();
 
         if (bookings.isEmpty()) {
-            throw new BadRequestException("Không có cuộc hẹn trong tương lai để hoàn tiền");
+            throw new BadRequestException("No future appointments available for refund");
         }
 
         for (VaccineSchedule booking: bookings) {
@@ -236,18 +253,16 @@ public class VNPayRefundService {
             // VNPAY API endpoint
             String apiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
 
-            // Prepare request headers
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
+            // Call the API using Jakarta RS Client
+            Response response = client
+                    .target(apiUrl)
+                    .request(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(vnpParams, MediaType.APPLICATION_JSON));
 
-            // Create HTTP entity with headers and body
-            HttpEntity<Map<String, String>> request = new HttpEntity<>(vnpParams, headers);
-
-            // Call the API
-            ResponseEntity<String> responseEntity = restTemplate.postForEntity(apiUrl, request, String.class);
+            String responseBody = response.readEntity(String.class);
 
             // Parse the response
-            Map<String, Object> responseMap = objectMapper.readValue(responseEntity.getBody(), Map.class);
+            Map<String, Object> responseMap = objectMapper.readValue(responseBody, Map.class);
 
             // Build and return the response object
             return RefundResponse.builder()
@@ -281,5 +296,4 @@ public class VNPayRefundService {
 
         refundTransactionRepository.save(refundTx);
     }
-
 }

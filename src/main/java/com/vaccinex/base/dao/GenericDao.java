@@ -16,4 +16,5 @@ public interface GenericDao<T, ID> {
     void deleteById(ID id);
     boolean existsById(ID id);
     long count();
+    List<T> saveAll(List<T> entities);
 }

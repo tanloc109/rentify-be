@@ -1,16 +1,18 @@
 package com.vaccinex.service;
 
-import com.vaccinex.dto.paging.PagingResponse;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 public abstract class BaseServiceImpl<T, ID> implements BaseService<T, ID> {
 
     @PersistenceContext
@@ -18,49 +20,18 @@ public abstract class BaseServiceImpl<T, ID> implements BaseService<T, ID> {
 
     private final Class<T> entityClass;
 
-    public BaseServiceImpl(Class<T> entityClass) {
-        this.entityClass = entityClass;
-    }
-
     @Override
-    @Transactional
-    public PagingResponse findAll(int currentPage, int pageSize) {
-        // Create Criteria Builder
+    public List<T> findAll() {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-
-        // Create Count Query
-        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-        countQuery.select(cb.count(countQuery.from(entityClass)));
-        long totalElements = entityManager.createQuery(countQuery).getSingleResult();
-
-        // Calculate total pages
-        int totalPages = (int) Math.ceil((double) totalElements / pageSize);
-
-        // Create Main Query
         CriteriaQuery<T> query = cb.createQuery(entityClass);
         Root<T> root = query.from(entityClass);
         query.select(root);
-
-        // Create TypedQuery
-        TypedQuery<T> typedQuery = entityManager.createQuery(query)
-                .setFirstResult((currentPage - 1) * pageSize)
-                .setMaxResults(pageSize);
-
-        // Execute query
-        List<T> resultList = typedQuery.getResultList();
-
-        return PagingResponse.builder()
-                .currentPage(currentPage)
-                .pageSize(pageSize)
-                .totalElements(totalElements)
-                .totalPages(totalPages)
-                .data(resultList)
-                .build();
+        return entityManager.createQuery(query).getResultList();
     }
 
     @Override
-    public T findById(ID id) {
-        return entityManager.find(entityClass, id);
+    public Optional<T> findById(ID id) {
+        return Optional.ofNullable(entityManager.find(entityClass, id));
     }
 
     @Override
@@ -70,15 +41,24 @@ public abstract class BaseServiceImpl<T, ID> implements BaseService<T, ID> {
         return entity;
     }
 
-    @Transactional
     @Override
+    @Transactional
+    public List<T> saveAll(List<T> entities) {
+        return entities.stream()
+                .map(this::save)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
     public T update(T entity) {
         return entityManager.merge(entity);
     }
 
-    @Transactional
     @Override
+    @Transactional
     public void delete(T entity) {
         entityManager.remove(entityManager.contains(entity) ? entity : entityManager.merge(entity));
     }
+
 }

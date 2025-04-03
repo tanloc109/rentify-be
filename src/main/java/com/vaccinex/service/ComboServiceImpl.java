@@ -1,12 +1,11 @@
 package com.vaccinex.service;
 
+import com.vaccinex.base.config.AppConfig;
+import com.vaccinex.base.exception.BadRequestException;
 import com.vaccinex.base.exception.ElementExistException;
 import com.vaccinex.base.exception.ElementNotFoundException;
 import com.vaccinex.base.exception.UnchangedStateException;
 import com.vaccinex.dao.ComboDao;
-import com.vaccinex.dto.paging.ComboPagingResponse;
-import com.vaccinex.dto.paging.PagingRequest;
-import com.vaccinex.dto.paging.PagingResponse;
 import com.vaccinex.dto.request.VaccineComboCreateRequest;
 import com.vaccinex.dto.request.VaccineComboUpdateRequest;
 import com.vaccinex.dto.response.ComboResponseDTO;
@@ -18,250 +17,127 @@ import com.vaccinex.pojo.Vaccine;
 import com.vaccinex.pojo.VaccineCombo;
 import com.vaccinex.pojo.VaccineTiming;
 import com.vaccinex.pojo.composite.VaccineComboId;
-import com.vaccinex.utils.PaginationUtil;
-import com.vaccinex.utils.VaccineComboSpecification;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.stream.Collectors;
 
 @Stateless
-@RequiredArgsConstructor
 public class ComboServiceImpl extends BaseServiceImpl<Combo, Integer> implements ComboService {
 
-    private final ComboDao comboRepository;
-    private final ComboMapper comboMapper;
-    private final VaccineMapper vaccineMapper;
+    @Inject
+    private ComboDao comboRepository;
 
-    @Value("${price.combo.below}")
-    private String below;
+    @Inject
+    private ComboMapper comboMapper;
 
-    @Value("${price.combo.higher}")
-    private String higher;
+    @Inject
+    private VaccineMapper vaccineMapper;
 
-    @Value("${price.combo.avg-begin}")
-    private String avgBegin;
+    public ComboServiceImpl() {
+        super(Combo.class);
+    }
 
-    @Value("${price.combo.avg-end}")
-    private String avgEnd;
+    private int getBusinessIntervalAfterActiveVaccine() {
+        return AppConfig.getBusinessIntervalAfterActiveVaccine();
+    }
 
-    @Value("${price.combo.default}")
-    private String priceDefault;
-
-    @Value("${business.interval-after-active-vaccine}")
-    private int businessIntervalAfterActiveVaccine;
-
-    @Value("${business.interval-after-inactive-vaccine}")
-    private int businessIntervalAfterInactiveVaccine;
-
-    @Override
-    public MappingJacksonValue getAllCombosV2(PagingRequest request) {
-        Pageable pageable = PaginationUtil.getPageable(request);
-        Page<Combo> combos = comboRepository.findByDeletedIsFalse(pageable);
-        List<ComboPagingResponse> mappedDTOList = combos.getContent().stream().map(ComboPagingResponse::fromEntity).toList();
-        return PaginationUtil.getPagedMappingJacksonValue(request, combos, mappedDTOList, "Lấy tất cả combo thành công");
+    private int getBusinessIntervalAfterInactiveVaccine() {
+        return AppConfig.getBusinessIntervalAfterInactiveVaccine();
     }
 
     @Override
-    public Combo getComboByIdV2(Integer id) {
-        return comboRepository.findByIdAndDeletedIsFalse(id).orElseThrow(
-                () -> new RuntimeException("Không tìm thấy combo với id: " + id)
-        );
+    public ComboResponseDTO toComboResponseDTO(Combo combo) {
+        return comboMapper.comboToComboResponseDTO(combo);
     }
 
     @Override
     public Combo getComboById(Integer id) {
-        return comboRepository.findByIdAndDeletedIsFalse(id).orElseThrow(
-                () -> new RuntimeException("Không tìm thấy combo với id: " + id)
-        );
+        return comboRepository.findByIdAndDeletedIsFalse(id)
+                .orElseThrow(() -> new ElementNotFoundException("Combo not found with id: " + id));
     }
 
     @Override
-    public PagingResponse getAllCombos(Integer currentPage, Integer pageSize) {
-        Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
-
-        var pageData = comboRepository.findAll(pageable);
-
-        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
-                .code("Success")
-                .message("Lấy danh sách combo với phân trang thành công")
-                .currentPage(currentPage)
-                .pageSize(pageSize)
-                .totalElements(pageData.getTotalElements())
-                .totalPages(pageData.getTotalPages())
-                .data(pageData.getContent().stream()
-                        .map(comboMapper::comboToComboResponseDTO)
-                        .toList())
-                .build() :
-                PagingResponse.builder()
-                        .code("Failed")
-                        .message("Lấy danh sách combo với phân trang không thành công")
-                        .currentPage(currentPage)
-                        .pageSize(pageSize)
-                        .totalElements(pageData.getTotalElements())
-                        .totalPages(pageData.getTotalPages())
-                        .data(pageData.getContent().stream()
-                                .map(comboMapper::comboToComboResponseDTO)
-                                .toList())
-                        .build();
+    public List<ComboResponseDTO> getAllCombos() {
+        List<Combo> combos = comboRepository.findAll();
+        return combos.stream()
+                .map(this::toComboResponseDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public PagingResponse getAllCombosActive(Integer currentPage, Integer pageSize) {
-        Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
-
-        var pageData = comboRepository.findAllByDeletedFalse(pageable);
-
-        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
-                .code("Success")
-                .message("Lấy danh sách combo đang hoạt động với phân trang thành công")
-                .currentPage(currentPage)
-                .pageSize(pageSize)
-                .totalElements(pageData.getTotalElements())
-                .totalPages(pageData.getTotalPages())
-                .data(pageData.getContent().stream()
-                        .map(comboMapper::comboToComboResponseDTO)
-                        .toList())
-                .build() :
-                PagingResponse.builder()
-                        .code("Failed")
-                        .message("Lấy danh sách combo đang hoạt động với phân trang không thành công")
-                        .currentPage(currentPage)
-                        .pageSize(pageSize)
-                        .totalElements(pageData.getTotalElements())
-                        .totalPages(pageData.getTotalPages())
-                        .data(pageData.getContent().stream()
-                                .map(comboMapper::comboToComboResponseDTO)
-                                .toList())
-                        .build();
+    public List<ComboResponseDTO> getAllCombosActive() {
+        List<Combo> activeCombos = comboRepository.findAllByDeletedIsFalse();
+        return activeCombos.stream()
+                .map(this::toComboResponseDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public PagingResponse searchVaccineCombos(Integer currentPage, Integer pageSize, String name, String price, Integer minAge, Integer maxAge, String sortBy) {
-        Pageable pageable;
+    public List<ComboResponseDTO> searchVaccineCombos(String name, String price, Integer minAge, Integer maxAge) {
+        List<Combo> allCombos = comboRepository.findAllByDeletedIsFalse();
 
-        Specification<Combo> spec = Specification.where(null);
-
-        List<String> keys = new ArrayList<>();
-        List<String> values = new ArrayList<>();
-
-        String searchName = "";
-        if (StringUtils.hasText(name)) {
-            searchName = name;
+        // Filter by name if provided
+        if (name != null && !name.isEmpty()) {
+            allCombos = allCombos.stream()
+                    .filter(combo -> combo.getName().toLowerCase().contains(name.toLowerCase()))
+                    .collect(Collectors.toList());
         }
-        keys.add("name");
-        values.add(searchName);
 
-        String searchPriceBegin = priceDefault;
-        String searchPriceEnd = String.valueOf(comboRepository.getMaxPrice());
-        if (StringUtils.hasText(price)) {
+        // Filter by price category if provided
+        if (price != null && !price.isEmpty()) {
+            Double priceBegin = null;
+            Double priceEnd = null;
+
             switch (price.trim().toLowerCase()) {
-                case "thấp" -> searchPriceEnd = below;
-                case "cao" -> searchPriceBegin = higher;
-                case "trung bình" -> {
-                    searchPriceEnd = avgEnd;
-                    searchPriceBegin = avgBegin;
-                }
+                case "low":
+                    priceEnd = Double.parseDouble(AppConfig.getPriceComboBelow());
+                    break;
+                case "high":
+                    priceBegin = Double.parseDouble(AppConfig.getPriceComboHigher());
+                    break;
+                case "medium":
+                    priceBegin = Double.parseDouble(AppConfig.getPriceComboAvgBegin());
+                    priceEnd = Double.parseDouble(AppConfig.getPriceComboAvgEnd());
+                    break;
+            }
+
+            final Double finalPriceBegin = priceBegin;
+            final Double finalPriceEnd = priceEnd;
+
+            if (finalPriceBegin != null) {
+                allCombos = allCombos.stream()
+                        .filter(combo -> combo.getPrice() >= finalPriceBegin)
+                        .collect(Collectors.toList());
+            }
+
+            if (finalPriceEnd != null) {
+                allCombos = allCombos.stream()
+                        .filter(combo -> combo.getPrice() <= finalPriceEnd)
+                        .collect(Collectors.toList());
             }
         }
 
-        keys.add("priceBegin");
-        keys.add("priceEnd");
-        values.add(searchPriceBegin);
-        values.add(searchPriceEnd);
-
-        String searchMinAge;
-        comboRepository.getMaxAge();
-        String searchMaxAge;
-        if (minAge != 0 && maxAge == 0) {
-            searchMinAge = String.valueOf(minAge);
-            keys.add("ageBegin");
-            values.add(searchMinAge);
-        } else if (minAge == 0 && maxAge != 0) {
-            searchMaxAge = String.valueOf(maxAge);
-            keys.add("ageEnd");
-            values.add(searchMaxAge);
-        } else if (minAge != 0 && maxAge != 0) {
-            String ageRange = minAge + "," + maxAge;
-
-            keys.add("ageRange");
-            values.add(ageRange);
+        // Filter by min age if provided
+        if (minAge != null && minAge > 0) {
+            allCombos = allCombos.stream()
+                    .filter(combo -> combo.getMinAge() >= minAge)
+                    .collect(Collectors.toList());
         }
 
-        if(keys.size() == values.size()) {
-            for(int i = 0; i < keys.size(); i++) {
-                String field = keys.get(i);
-                String value = values.get(i);
-                Specification<Combo> newSpec = VaccineComboSpecification.searchByField(field, value);
-                if(newSpec != null) {
-                    spec = spec.and(newSpec);
-                }
-            }
+        // Filter by max age if provided
+        if (maxAge != null && maxAge > 0) {
+            allCombos = allCombos.stream()
+                    .filter(combo -> combo.getMaxAge() <= maxAge)
+                    .collect(Collectors.toList());
         }
 
-        List<Sort.Order> orders = new ArrayList<>();
-        if (StringUtils.hasText(sortBy)) {
-            String sortByLower = sortBy.trim().toLowerCase();
-
-            boolean hasNameASC = sortByLower.contains("nameasc");
-            boolean hasNameDESC = sortByLower.contains("namedesc");
-            boolean hasPriceASC = sortByLower.contains("priceasc");
-            boolean hasPriceDESC = sortByLower.contains("pricedesc");
-            boolean hasMinAgeASC = sortByLower.contains("ageminasc");
-            boolean hasMinAgeDESC = sortByLower.contains("agemindesc");
-            boolean hasMaxAgeDESC = sortByLower.contains("agemaxdesc");
-            boolean hasMaxAgeASC = sortByLower.contains("agemaxasc");
-
-            if (hasNameASC ^ hasNameDESC) {
-                orders.add(hasNameASC ? Sort.Order.asc("name") : Sort.Order.desc("name"));
-            }
-
-            if (hasPriceASC ^ hasPriceDESC) {
-                orders.add(hasPriceASC ? Sort.Order.asc("price") : Sort.Order.desc("price"));
-            }
-
-            if (hasMinAgeASC ^ hasMinAgeDESC) {
-                orders.add(hasMinAgeASC ? Sort.Order.asc("minAge") : Sort.Order.desc("minAge"));
-            }
-
-            if (hasMaxAgeASC ^ hasMaxAgeDESC) {
-                orders.add(hasMaxAgeASC ? Sort.Order.asc("maxAge") : Sort.Order.desc("maxAge"));
-            }
-
-        }
-
-        Sort sort = orders.isEmpty() ? Sort.unsorted() : Sort.by(orders);
-
-        pageable = PageRequest.of(currentPage - 1, pageSize, sort);
-
-        var pageData = comboRepository.findAll(spec, pageable);
-
-        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
-                .code("Success")
-                .message("Lấy danh sách combo với bộ lọc, sắp xếp và phân trang thành công")
-                .currentPage(currentPage)
-                .pageSize(pageSize)
-                .totalElements(pageData.getTotalElements())
-                .totalPages(pageData.getTotalPages())
-                .data(pageData.getContent().stream()
-                        .map(comboMapper::comboToComboResponseDTO)
-                        .toList())
-                .build() :
-                PagingResponse.builder()
-                        .code("Failed")
-                        .message("Lấy tất cả bộ lọc kết hợp và sắp xếp phân trang thất bại")
-                        .currentPage(currentPage)
-                        .pageSize(pageSize)
-                        .totalElements(pageData.getTotalElements())
-                        .totalPages(pageData.getTotalPages())
-                        .data(pageData.getContent().stream()
-                                .map(comboMapper::comboToComboResponseDTO)
-                                .toList())
-                        .build();
+        return allCombos.stream()
+                .map(this::toComboResponseDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -269,15 +145,15 @@ public class ComboServiceImpl extends BaseServiceImpl<Combo, Integer> implements
     public ComboResponseDTO createCombo(VaccineComboCreateRequest vaccineComboCreateRequest) {
         Combo checkExist = comboRepository.findComboByName(vaccineComboCreateRequest.getName());
         if (checkExist != null) {
-            throw new ElementExistException("Gói tiêm đã tồn tại với tên là: " + vaccineComboCreateRequest.getName());
+            throw new ElementExistException("A combo with this name already exists: " + vaccineComboCreateRequest.getName());
         }
 
         if (vaccineComboCreateRequest.getMinAge() > vaccineComboCreateRequest.getMaxAge()) {
-            throw new BadRequestException("Tuổi nhỏ nhất phải nhỏ hơn tuổi lớn nhất");
+            throw new BadRequestException("Minimum age must be less than maximum age");
         }
 
         if (vaccineComboCreateRequest.getVaccines() == null || vaccineComboCreateRequest.getVaccines().isEmpty()) {
-            throw new BadRequestException("Phải có ít nhất 1 vaccine bên trong gói tiêm");
+            throw new BadRequestException("Combo must contain at least one vaccine");
         }
 
         Combo combo = Combo.builder()
@@ -302,11 +178,11 @@ public class ComboServiceImpl extends BaseServiceImpl<Combo, Integer> implements
 
             if (previousVaccineCombo != null) {
                 boolean isCurrentActivated = previousVaccineCombo.getVaccine().isActivated();
-                int requiredInterval = isCurrentActivated ? businessIntervalAfterActiveVaccine : businessIntervalAfterInactiveVaccine;
+                int requiredInterval = isCurrentActivated ? getBusinessIntervalAfterActiveVaccine() : getBusinessIntervalAfterInactiveVaccine();
                 long actualInterval = vaccineComboResponseDTO.getIntervalDays();
 
                 if (actualInterval < requiredInterval) {
-                    throw new BadRequestException(vaccine.getName() + " phải cách " + previousVaccineCombo.getVaccine().getName() + " ít nhất là " + requiredInterval + " ngày");
+                    throw new BadRequestException(vaccine.getName() + " must be separated from " + previousVaccineCombo.getVaccine().getName() + " by at least " + requiredInterval + " days");
                 }
             }
 
@@ -322,22 +198,20 @@ public class ComboServiceImpl extends BaseServiceImpl<Combo, Integer> implements
         }
         combo.setVaccineCombos(updatedVaccineCombo);
 
-        return comboMapper.comboToComboResponseDTO(comboRepository.save(combo));
+        return toComboResponseDTO(comboRepository.save(combo));
     }
 
     @Transactional
     @Override
     public ComboResponseDTO updateCombo(VaccineComboUpdateRequest vaccineComboUpdateRequest, int comboID) {
-        Combo combo = comboRepository.findComboById(comboID);
-        if (combo == null) {
-            throw new ElementNotFoundException("Không tìm thấy gói tiêm");
-        }
+        Combo combo = comboRepository.findById(comboID)
+                .orElseThrow(() -> new ElementNotFoundException("Combo not found with id: " + comboID));
 
         if (vaccineComboUpdateRequest.getName() != null) {
             if (!combo.getName().equals(vaccineComboUpdateRequest.getName())) {
                 Combo checkExist = comboRepository.findComboByName(vaccineComboUpdateRequest.getName());
                 if (checkExist != null) {
-                    throw new ElementExistException("Gói tiêm đã tồn tại với tên là: " + vaccineComboUpdateRequest.getName());
+                    throw new ElementExistException("A combo with this name already exists: " + vaccineComboUpdateRequest.getName());
                 }
             }
             combo.setName(vaccineComboUpdateRequest.getName());
@@ -376,18 +250,18 @@ public class ComboServiceImpl extends BaseServiceImpl<Combo, Integer> implements
                         for (VaccineTiming vaccineTiming : vaccine.getVaccineTimings()) {
                             if (vaccineTiming.getDoseNo() == check) {
                                 if (vaccineTiming.getIntervalDays() != vaccineComboResponseDTO.getIntervalDays()) {
-                                    throw new BadRequestException(vaccine.getName() + " phải cách " + previousVaccineCombo.getVaccine().getName() + " ít nhất là " + vaccineTiming.getIntervalDays() + " ngày");
+                                    throw new BadRequestException(vaccine.getName() + " must be separated from " + previousVaccineCombo.getVaccine().getName() + " by at least " + vaccineTiming.getIntervalDays() + " days");
                                 }
                             }
                         }
                     } else {
                         check = 1;
                         boolean isCurrentActivated = previousVaccineCombo.getVaccine().isActivated();
-                        int requiredInterval = isCurrentActivated ? businessIntervalAfterActiveVaccine : businessIntervalAfterInactiveVaccine;
+                        int requiredInterval = isCurrentActivated ? getBusinessIntervalAfterActiveVaccine() : getBusinessIntervalAfterInactiveVaccine();
                         long actualInterval = vaccineComboResponseDTO.getIntervalDays();
 
                         if (actualInterval < requiredInterval) {
-                            throw new BadRequestException(vaccine.getName() + " phải cách " + previousVaccineCombo.getVaccine().getName() + " ít nhất là " + requiredInterval + " ngày");
+                            throw new BadRequestException(vaccine.getName() + " must be separated from " + previousVaccineCombo.getVaccine().getName() + " by at least " + requiredInterval + " days");
                         }
                     }
                 }
@@ -404,29 +278,27 @@ public class ComboServiceImpl extends BaseServiceImpl<Combo, Integer> implements
             combo.setVaccineCombos(updatedVaccineCombo);
         }
 
-        return comboMapper.comboToComboResponseDTO(comboRepository.save(combo));
+        return toComboResponseDTO(comboRepository.save(combo));
     }
 
     @Override
     public ComboResponseDTO undeleteCombo(Integer comboID) {
-        Combo combo = comboRepository.findComboById(comboID);
-        if (combo == null) {
-            throw new ElementNotFoundException("Không tìm thấy combo");
-        }
+        Combo combo = comboRepository.findById(comboID)
+                .orElseThrow(() -> new ElementNotFoundException("Combo not found with id: " + comboID));
+
         if (!combo.isDeleted()) {
-            throw new UnchangedStateException("Combo chưa bị xóa");
+            throw new UnchangedStateException("Combo is not deleted");
         }
         combo.setDeleted(false);
-        return comboMapper.comboToComboResponseDTO(comboRepository.save(combo));
+        return toComboResponseDTO(comboRepository.save(combo));
     }
 
     @Override
     public ComboResponseDTO deleteCombo(Integer comboID) {
-        Combo combo = comboRepository.findComboById(comboID);
-        if (combo == null) {
-            throw new ElementNotFoundException("Không tìm thấy combo");
-        }
+        Combo combo = comboRepository.findById(comboID)
+                .orElseThrow(() -> new ElementNotFoundException("Combo not found with id: " + comboID));
+
         combo.setDeleted(true);
-        return comboMapper.comboToComboResponseDTO(comboRepository.save(combo));
+        return toComboResponseDTO(comboRepository.save(combo));
     }
 }

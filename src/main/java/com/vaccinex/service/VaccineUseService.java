@@ -1,6 +1,5 @@
 package com.vaccinex.service;
 
-import com.vaccinex.dto.paging.PagingResponse;
 import com.vaccinex.dto.request.VaccineUseCreateRequest;
 import com.vaccinex.dto.request.VaccineUseUpdateRequest;
 import com.vaccinex.dto.response.VaccineUseResponseDTO;
@@ -9,9 +8,9 @@ import com.vaccinex.pojo.VaccineUse;
 import java.util.List;
 
 public interface VaccineUseService extends BaseService<VaccineUse, Integer> {
-    PagingResponse getAllPurposes(Integer currentPage, Integer pageSize);
+    List<VaccineUseResponseDTO> getAllPurposes();
 
-    PagingResponse getAllPurposesActive(Integer currentPage, Integer pageSize);
+    List<VaccineUseResponseDTO> getAllPurposesActive();
 
     List<VaccineUseResponseDTO> getPurposes();
 
@@ -25,6 +24,6 @@ public interface VaccineUseService extends BaseService<VaccineUse, Integer> {
 
     VaccineUseResponseDTO deletePurpose(Integer purposeID);
 
-    PagingResponse searchVaccineUses(Integer currentPage, Integer pageSize, String name, String sortBy);
+    List<VaccineUseResponseDTO> searchVaccineUses(String name);
 
 }

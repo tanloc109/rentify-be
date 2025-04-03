@@ -1,6 +1,6 @@
 package com.vaccinex.thirdparty.refund;
 
-import com.sba301.vaccinex.pojo.Payment;
+import com.vaccinex.pojo.Payment;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

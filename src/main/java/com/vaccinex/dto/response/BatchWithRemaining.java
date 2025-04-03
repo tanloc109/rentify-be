@@ -1,6 +1,6 @@
 package com.vaccinex.dto.response;
 
-import com.sba301.vaccinex.pojo.Vaccine;
+import com.vaccinex.pojo.Vaccine;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+
 public class BatchWithRemaining {
     Integer id;
     String batchCode;

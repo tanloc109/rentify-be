@@ -2,16 +2,12 @@ package com.vaccinex.controller;
 
 import com.vaccinex.base.exception.ElementExistException;
 import com.vaccinex.base.exception.ElementNotFoundException;
+import com.vaccinex.base.exception.BadRequestException;
 import com.vaccinex.base.exception.UnchangedStateException;
-import com.vaccinex.dto.paging.PagingRequest;
-import com.vaccinex.dto.paging.PagingResponse;
 import com.vaccinex.dto.request.VaccineComboCreateRequest;
 import com.vaccinex.dto.request.VaccineComboUpdateRequest;
 import com.vaccinex.dto.response.ComboResponseDTO;
 import com.vaccinex.dto.response.ObjectResponse;
-import com.vaccinex.mapper.ComboMapper;
-import com.vaccinex.pojo.Combo;
-
 import com.vaccinex.service.ComboService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,13 +15,12 @@ import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
 
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Path("/combos")
@@ -36,108 +31,63 @@ public class ComboController {
     @Inject
     private ComboService comboService;
 
-    @Inject
-    private ComboMapper comboMapper;
-
-    @Context
-    private UriInfo uriInfo;
-
-    private int getParamValue(String paramName, int defaultValue) {
-        String paramValue = uriInfo.getQueryParameters().getFirst(paramName);
-        return paramValue != null ? Integer.parseInt(paramValue) : defaultValue;
-    }
-
     @GET
-    @Operation(summary = "Get all combos", description = "Retrieves all combos, with optional pagination")
+    @Operation(summary = "Get all combos", description = "Retrieves all combos")
     @RolesAllowed({"ADMIN"})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllCombos(
-            @QueryParam("currentPage") Integer currentPage,
-            @QueryParam("pageSize") Integer pageSize
-    ) {
-        int resolvedCurrentPage = currentPage != null ? currentPage : 1;
-        int resolvedPageSize = pageSize != null ? pageSize : 10;
+    public Response getAllCombos() {
+        List<ComboResponseDTO> results = comboService.getAllCombos();
 
-        PagingResponse results = comboService.getAllCombos(resolvedCurrentPage, resolvedPageSize);
-        List<?> data = (List<?>) results.getData();
-
-        return data.isEmpty()
-                ? Response.status(Response.Status.BAD_REQUEST).entity(results).build()
-                : Response.ok(results).build();
+        return !results.isEmpty()
+                ? Response.ok(new ObjectResponse("Success", "Retrieved all combos successfully", results)).build()
+                : Response.status(Response.Status.NOT_FOUND)
+                .entity(new ObjectResponse("Fail", "No combos found", null))
+                .build();
     }
 
     @GET
     @Path("/active")
-    @Operation(summary = "Get all active combos", description = "Retrieves all combos have status is active")
+    @Operation(summary = "Get all active combos", description = "Retrieves all combos that are active")
     @RolesAllowed({"USER", "ADMIN"})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllCombosActive(
-            @QueryParam("currentPage") Integer currentPage,
-            @QueryParam("pageSize") Integer pageSize
-    ) {
-        int resolvedCurrentPage = currentPage != null ? currentPage : 1;
-        int resolvedPageSize = pageSize != null ? pageSize : 10;
+    public Response getAllCombosActive() {
+        List<ComboResponseDTO> results = comboService.getAllCombosActive();
 
-        PagingResponse results = comboService.getAllCombosActive(resolvedCurrentPage, resolvedPageSize);
-        List<?> data = (List<?>) results.getData();
-
-        return data.isEmpty()
-                ? Response.status(Response.Status.BAD_REQUEST).entity(results).build()
-                : Response.ok(results).build();
+        return !results.isEmpty()
+                ? Response.ok(new ObjectResponse("Success", "Retrieved all active combos successfully", results)).build()
+                : Response.status(Response.Status.NOT_FOUND)
+                .entity(new ObjectResponse("Fail", "No active combos found", null))
+                .build();
     }
 
     @GET
     @Path("/search")
-    @Operation(summary = "Search active vaccine combos", description = "Retrieves vaccineCombos filtered by various parameters")
+    @Operation(summary = "Search active vaccine combos", description = "Retrieves combos filtered by various parameters")
     @RolesAllowed({"USER", "ADMIN"})
     @Produces(MediaType.APPLICATION_JSON)
     public Response searchVaccines(
-            @QueryParam("currentPage") Integer currentPage,
-            @QueryParam("pageSize") Integer pageSize,
             @QueryParam("name") @DefaultValue("") String name,
-            @QueryParam("purpose") @DefaultValue("") String purpose,
             @QueryParam("price") @DefaultValue("") String price,
-            @QueryParam("minAge") Integer minAge,
-            @QueryParam("maxAge") Integer maxAge,
-            @QueryParam("sortBy") String sortBy
+            @QueryParam("minAge") @DefaultValue("0") Integer minAge,
+            @QueryParam("maxAge") @DefaultValue("0") Integer maxAge
     ) {
-        int resolvedCurrentPage = currentPage != null ? currentPage : 1;
-        int resolvedPageSize = pageSize != null ? pageSize : 10;
-        int resolvedMinAge = minAge != null ? minAge : 0;
-        int resolvedMaxAge = maxAge != null ? maxAge : 0;
+        List<ComboResponseDTO> results = comboService.searchVaccineCombos(name, price, minAge, maxAge);
 
-        PagingResponse results = comboService.searchVaccineCombos(
-                resolvedCurrentPage, resolvedPageSize, name, price,
-                resolvedMinAge, resolvedMaxAge, sortBy
-        );
-
-        List<?> data = (List<?>) results.getData();
-        return data.isEmpty()
-                ? Response.status(Response.Status.BAD_REQUEST).entity(results).build()
-                : Response.ok(results).build();
+        return !results.isEmpty()
+                ? Response.ok(new ObjectResponse("Success", "Search completed successfully", results)).build()
+                : Response.status(Response.Status.NOT_FOUND)
+                .entity(new ObjectResponse("Fail", "No combos found matching the criteria", null))
+                .build();
     }
 
     @POST
     @Path("/{combo-id}/restore")
-    @Operation(summary = "Restore combo", description = "Restore combo by combo id set delete = false")
+    @Operation(summary = "Restore combo", description = "Restore combo by setting deleted = false")
     @RolesAllowed({"ADMIN"})
     @Produces(MediaType.APPLICATION_JSON)
     public Response unDeleteComboByID(@PathParam("combo-id") int comboID) {
-        try {
-            ComboResponseDTO combo = comboService.undeleteCombo(comboID);
-            return Response.ok(
-                    new ObjectResponse("Success", "Undelete combo successfully", combo)
-            ).build();
-        } catch (ElementNotFoundException | UnchangedStateException e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ObjectResponse("Fail", "Undelete combo failed: " + e.getMessage(), null)
-            ).build();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error undeleting combo", e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ObjectResponse("Fail", "Undelete combo failed", null)
-            ).build();
-        }
+        ComboResponseDTO combo = comboService.undeleteCombo(comboID);
+        return Response.ok(new ObjectResponse("Success", "Combo restored successfully", combo)).build();
     }
 
     @GET
@@ -146,15 +96,8 @@ public class ComboController {
     @RolesAllowed({"USER", "ADMIN"})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getComboByID(@PathParam("combo-id") int comboID) {
-        Combo combo = comboService.findById(comboID);
-        return combo != null
-                ? Response.ok(
-                new ObjectResponse("Success", "Get combo by ID successfully",
-                        comboMapper.comboToComboResponseDTO(combo))
-        ).build()
-                : Response.status(Response.Status.BAD_REQUEST).entity(
-                new ObjectResponse("Fail", "Get combo by ID failed", null)
-        ).build();
+        ComboResponseDTO combo = comboService.toComboResponseDTO(comboService.getComboById(comboID));
+        return Response.ok(new ObjectResponse("Success", "Retrieved combo successfully", combo)).build();
     }
 
     @POST
@@ -163,22 +106,10 @@ public class ComboController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createCombo(@Valid VaccineComboCreateRequest vaccineComboCreateRequest) {
-        try {
-            ComboResponseDTO comboResponseDTO = comboService.createCombo(vaccineComboCreateRequest);
-            return Response.ok(
-                    new ObjectResponse("Success", "Combo created successfully", comboResponseDTO)
-            ).build();
-        } catch (BadRequestException | ElementExistException e) {
-            LOGGER.log(Level.SEVERE, "Error creating combo", e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ObjectResponse("Fail", "Combo creation failed: " + e.getMessage(), null)
-            ).build();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error creating combo", e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ObjectResponse("Fail", "Combo creation failed", null)
-            ).build();
-        }
+        ComboResponseDTO comboResponseDTO = comboService.createCombo(vaccineComboCreateRequest);
+        return Response.status(Response.Status.CREATED)
+                .entity(new ObjectResponse("Success", "Combo created successfully", comboResponseDTO))
+                .build();
     }
 
     @PUT
@@ -191,26 +122,8 @@ public class ComboController {
             @PathParam("combo-id") int comboID,
             VaccineComboUpdateRequest vaccineComboUpdateRequest
     ) {
-        try {
-            ComboResponseDTO comboResponseDTO = comboService.updateCombo(vaccineComboUpdateRequest, comboID);
-            return comboResponseDTO != null
-                    ? Response.ok(
-                    new ObjectResponse("Success", "Combo updated successfully", comboResponseDTO)
-            ).build()
-                    : Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ObjectResponse("Fail", "Combo update failed. No valid combo found", null)
-            ).build();
-        } catch (BadRequestException | ElementNotFoundException e) {
-            LOGGER.log(Level.SEVERE, "Error updating combo", e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ObjectResponse("Fail", "Combo update failed: " + e.getMessage(), null)
-            ).build();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error updating combo", e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ObjectResponse("Fail", "Combo update failed", null)
-            ).build();
-        }
+        ComboResponseDTO comboResponseDTO = comboService.updateCombo(vaccineComboUpdateRequest, comboID);
+        return Response.ok(new ObjectResponse("Success", "Combo updated successfully", comboResponseDTO)).build();
     }
 
     @DELETE
@@ -219,43 +132,47 @@ public class ComboController {
     @RolesAllowed({"ADMIN"})
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteComboByID(@PathParam("combo-id") int comboID) {
-        try {
-            Combo combo = comboService.findById(comboID);
-            if (combo != null) {
-                combo.setDeleted(true);
-                return Response.ok(
-                        new ObjectResponse("Success", "Combo deleted successfully",
-                                comboMapper.comboToComboResponseDTO(comboService.save(combo)))
-                ).build();
-            }
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ObjectResponse("Fail", "Combo deletion failed", null)
-            ).build();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error deleting combo", e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ObjectResponse("Fail", "Combo deletion failed", null)
-            ).build();
+        ComboResponseDTO deletedCombo = comboService.deleteCombo(comboID);
+        return Response.ok(new ObjectResponse("Success", "Combo deleted successfully", deletedCombo)).build();
+    }
+
+    @Provider
+    public static class ElementNotFoundExceptionMapper implements ExceptionMapper<ElementNotFoundException> {
+        @Override
+        public Response toResponse(ElementNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(new ObjectResponse("Fail", e.getMessage(), null))
+                    .build();
         }
     }
 
-    @GET
-    @Path("/v2")
-    @RolesAllowed({"USER", "DOCTOR", "ADMIN"})
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllCombosV2(
-            @QueryParam("pageNo") @DefaultValue("1") Integer pageNo,
-            @QueryParam("pageSize") @DefaultValue("10") Integer pageSize,
-            @QueryParam("params") String params,
-            @QueryParam("sortBy") @DefaultValue("id") String sortBy
-    ) {
-        return Response.ok(
-                comboService.getAllCombosV2(PagingRequest.builder()
-                        .pageNo(pageNo)
-                        .pageSize(pageSize)
-                        .params(params)
-                        .sortBy(sortBy)
-                        .build())
-        ).build();
+    @Provider
+    public static class BadRequestExceptionMapper implements ExceptionMapper<BadRequestException> {
+        @Override
+        public Response toResponse(BadRequestException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ObjectResponse("Fail", e.getMessage(), null))
+                    .build();
+        }
+    }
+
+    @Provider
+    public static class ElementExistExceptionMapper implements ExceptionMapper<ElementExistException> {
+        @Override
+        public Response toResponse(ElementExistException e) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity(new ObjectResponse("Fail", e.getMessage(), null))
+                    .build();
+        }
+    }
+
+    @Provider
+    public static class UnchangedStateExceptionMapper implements ExceptionMapper<UnchangedStateException> {
+        @Override
+        public Response toResponse(UnchangedStateException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ObjectResponse("Fail", e.getMessage(), null))
+                    .build();
+        }
     }
 }

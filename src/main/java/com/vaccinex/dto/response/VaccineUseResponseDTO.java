@@ -13,5 +13,4 @@ public class VaccineUseResponseDTO {
     String name;
     String description;
     boolean deleted;
-
 }

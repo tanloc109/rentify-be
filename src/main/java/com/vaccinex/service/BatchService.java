@@ -1,6 +1,6 @@
 package com.vaccinex.service;
 
-import com.vaccinex.dto.paging.PagingRequest;
+import com.vaccinex.dto.response.BatchResponse;
 import com.vaccinex.dto.request.BatchCreateRequest;
 import com.vaccinex.dto.request.BatchUpdateRequest;
 import com.vaccinex.dto.request.VaccineReturnRequest;
@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface BatchService {
 
-    MappingJacksonValue getAllBatches(PagingRequest request);
+    List<BatchResponse> getAllBatches();
 
     Batch getBatchById(Integer id);
 

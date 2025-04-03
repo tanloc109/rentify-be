@@ -1,6 +1,6 @@
 package com.vaccinex.mapper;
 
-import com.vaccinex.dto.paging.BatchPagingResponse;
+import com.vaccinex.dto.response.BatchResponse;
 import com.vaccinex.pojo.Batch;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -14,5 +14,5 @@ public interface BatchMapper {
     @Mapping(source = "vaccine.id", target = "vaccineId")
     @Mapping(source = "vaccine.name", target = "vaccineName")
     @Mapping(source = "vaccine.vaccineCode", target = "vaccineCode")
-    BatchPagingResponse toBatchResponse(Batch batch);
+    BatchResponse toBatchResponse(Batch batch);
 }

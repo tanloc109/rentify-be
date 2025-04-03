@@ -1,6 +1,6 @@
 package com.vaccinex.dto.request;
 
-import com.sba301.vaccinex.pojo.enums.Gender;
+import com.vaccinex.pojo.enums.Gender;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

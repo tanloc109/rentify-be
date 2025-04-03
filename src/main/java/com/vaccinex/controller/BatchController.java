@@ -1,6 +1,5 @@
 package com.vaccinex.controller;
 
-import com.vaccinex.dto.paging.PagingRequest;
 import com.vaccinex.dto.request.BatchCreateRequest;
 import com.vaccinex.dto.request.BatchUpdateRequest;
 import com.vaccinex.dto.request.VaccineReturnRequest;
@@ -36,25 +35,9 @@ public class BatchController {
             @QueryParam("params") String params,
             @QueryParam("sortBy") @DefaultValue("id") String sortBy
     ) {
-        // Extract filters from query parameters
-        Map<String, String> filters = uriInfo.getQueryParameters()
-                .entrySet()
-                .stream()
-                .filter(e -> !e.getKey().matches("pageNo|pageSize|params|sortBy"))
-                .collect(java.util.stream.Collectors.toMap(
-                        Map.Entry::getKey,
-                        e -> e.getValue().get(0)
-                ));
-
         return Response
                 .status(Response.Status.OK)
-                .entity(batchService.getAllBatches(PagingRequest.builder()
-                        .pageNo(pageNo)
-                        .pageSize(pageSize)
-                        .params(params)
-                        .filters(filters)
-                        .sortBy(sortBy)
-                        .build()))
+                .entity(batchService.getAllBatches())
                 .build();
     }
 

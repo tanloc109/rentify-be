@@ -1,4 +1,4 @@
-package com.vaccinex.dto.paging;
+package com.vaccinex.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.vaccinex.pojo.Combo;
@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonFilter("dynamicFilter")
-public class ComboPagingResponse {
+public class ComboResponse {
     Integer id;
     String name;
     String description;
@@ -33,8 +33,8 @@ public class ComboPagingResponse {
         Integer orderInCombo;
     }
 
-    public static ComboPagingResponse fromEntity(Combo combo) {
-        return ComboPagingResponse.builder()
+    public static ComboResponse fromEntity(Combo combo) {
+        return ComboResponse.builder()
                 .id(combo.getId())
                 .name(combo.getName())
                 .description(combo.getDescription())

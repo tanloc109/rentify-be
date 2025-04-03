@@ -1,12 +1,11 @@
 package com.vaccinex.controller;
 
-import com.vaccinex.dto.paging.PagingRequest;
 import com.vaccinex.dto.request.CustomerUpdateProfile;
 import com.vaccinex.dto.request.FeedbackRequestDTO;
 import com.vaccinex.dto.request.ReactionCreateRequest;
 import com.vaccinex.dto.response.ChildrenResponseDTO;
 import com.vaccinex.dto.response.CustomerInfoResponse;
-
+import com.vaccinex.dto.response.CustomerScheduleResponse;
 import com.vaccinex.dto.response.ObjectResponse;
 import com.vaccinex.service.CustomerService;
 import com.vaccinex.service.VaccineScheduleService;
@@ -82,20 +81,15 @@ public class CustomerController {
     @Path("/{customerId}/schedules")
     @RolesAllowed("USER")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getSchedules(
-            @PathParam("customerId") Integer customerId,
-            @QueryParam("pageNo") @DefaultValue("1") Integer pageNo,
-            @QueryParam("pageSize") @DefaultValue("10") Integer pageSize,
-            @QueryParam("sortBy") @DefaultValue("id") String sortBy
-    ) {
+    public Response getSchedules(@PathParam("customerId") Integer customerId) {
+        List<CustomerScheduleResponse> schedules = vaccineScheduleService.getVaccinesByCustomer(customerId);
+
         return Response.ok(
-                vaccineScheduleService.getVaccinesByCustomer(customerId,
-                        PagingRequest.builder()
-                                .pageNo(pageNo)
-                                .pageSize(pageSize)
-                                .sortBy(sortBy)
-                                .build()
-                )
+                ObjectResponse.builder()
+                        .status(Response.Status.OK.toString())
+                        .message("Schedules retrieved successfully")
+                        .data(schedules)
+                        .build()
         ).build();
     }
 

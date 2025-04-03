@@ -2,15 +2,14 @@ package com.vaccinex.controller;
 
 import com.vaccinex.base.exception.ElementExistException;
 import com.vaccinex.base.exception.ElementNotFoundException;
+import com.vaccinex.base.exception.IdNotFoundException;
 import com.vaccinex.base.exception.UnchangedStateException;
-import com.vaccinex.dto.paging.PagingResponse;
 import com.vaccinex.dto.request.VaccineCreateRequest;
 import com.vaccinex.dto.request.VaccineUpdateRequest;
 import com.vaccinex.dto.response.ObjectResponse;
 import com.vaccinex.dto.response.VaccineResponseDTO;
 import com.vaccinex.mapper.VaccineMapper;
 import com.vaccinex.pojo.Vaccine;
-
 import com.vaccinex.service.BatchService;
 import com.vaccinex.service.VaccineService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,19 +19,14 @@ import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
 
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @Path("/vaccines")
 @Tag(name = "Vaccine", description = "Vaccine Management Operations")
 public class VaccineController {
-    private static final Logger LOGGER = Logger.getLogger(VaccineController.class.getName());
 
     @Inject
     private VaccineService vaccineService;
@@ -43,38 +37,27 @@ public class VaccineController {
     @Inject
     private BatchService batchService;
 
-    @Context
-    private UriInfo uriInfo;
-
-    private int getParamValue(String paramName, int defaultValue) {
-        String paramValue = uriInfo.getQueryParameters().getFirst(paramName);
-        return paramValue != null ? Integer.parseInt(paramValue) : defaultValue;
-    }
-
     @GET
-    @PermitAll
+    @Path("/active")
+    @RolesAllowed({"USER", "ADMIN"})
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get all vaccines", description = "Retrieves all vaccines, with optional pagination")
-    public Response getAllVaccines(
-            @QueryParam("currentPage") Integer currentPage,
-            @QueryParam("pageSize") Integer pageSize
-    ) {
-        int resolvedCurrentPage = currentPage != null ? currentPage : 1;
-        int resolvedPageSize = pageSize != null ? pageSize : 10;
-
-        PagingResponse results = vaccineService.getAllVaccines(resolvedCurrentPage, resolvedPageSize);
-        List<?> data = (List<?>) results.getData();
-
-        return data.isEmpty()
-                ? Response.status(Response.Status.BAD_REQUEST).entity(results).build()
-                : Response.ok(results).build();
+    @Operation(summary = "Get all active vaccines", description = "Retrieves all non-deleted vaccines")
+    public Response getAllVaccinesActive() {
+        List<VaccineResponseDTO> results = vaccineService.getAllVaccineActive();
+        return results.isEmpty()
+                ? Response.status(Response.Status.BAD_REQUEST).entity(
+                new ObjectResponse("Failed", "Active vaccine retrieval unsuccessful", null)
+        ).build()
+                : Response.ok(
+                new ObjectResponse("Success", "Active vaccine retrieval successful", results)
+        ).build();
     }
 
     @GET
     @Path("/non-paging")
     @RolesAllowed("ADMIN")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get all vaccines not paging", description = "Retrieves all vaccines not paging")
+    @Operation(summary = "Get all vaccines", description = "Retrieves all vaccines")
     public Response getAllVaccinesNotPaging(
             @QueryParam("status") String status
     ) {
@@ -92,54 +75,28 @@ public class VaccineController {
     }
 
     @GET
-    @Path("/active")
-    @RolesAllowed({"USER", "ADMIN"})
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get all active vaccines", description = "Retrieves all vaccines with active status")
-    public Response getAllVaccinesActive(
-            @QueryParam("currentPage") Integer currentPage,
-            @QueryParam("pageSize") Integer pageSize
-    ) {
-        int resolvedCurrentPage = currentPage != null ? currentPage : 1;
-        int resolvedPageSize = pageSize != null ? pageSize : 10;
-
-        PagingResponse results = vaccineService.getAllVaccineActive(resolvedCurrentPage, resolvedPageSize);
-        List<?> data = (List<?>) results.getData();
-
-        return data.isEmpty()
-                ? Response.status(Response.Status.BAD_REQUEST).entity(results).build()
-                : Response.ok(results).build();
-    }
-
-    @GET
     @Path("/search")
     @RolesAllowed({"USER", "ADMIN"})
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Search active vaccines", description = "Search vaccines by various criteria")
+    @Operation(summary = "Search vaccines", description = "Search vaccines by various criteria")
     public Response searchVaccines(
-            @QueryParam("currentPage") Integer currentPage,
-            @QueryParam("pageSize") Integer pageSize,
             @QueryParam("name") @DefaultValue("") String name,
             @QueryParam("purpose") @DefaultValue("") String purpose,
             @QueryParam("price") @DefaultValue("") String price,
             @QueryParam("minAge") Integer minAge,
-            @QueryParam("maxAge") Integer maxAge,
-            @QueryParam("sortBy") String sortBy
+            @QueryParam("maxAge") Integer maxAge
     ) {
-        int resolvedCurrentPage = currentPage != null ? currentPage : 1;
-        int resolvedPageSize = pageSize != null ? pageSize : 10;
-        int resolvedMinAge = minAge != null ? minAge : 0;
-        int resolvedMaxAge = maxAge != null ? maxAge : 0;
-
-        PagingResponse results = vaccineService.searchVaccines(
-                resolvedCurrentPage, resolvedPageSize, name, purpose, price,
-                resolvedMinAge, resolvedMaxAge, sortBy
+        List<VaccineResponseDTO> results = vaccineService.searchVaccines(
+                name, purpose, price, minAge, maxAge
         );
 
-        List<?> data = (List<?>) results.getData();
-        return data.isEmpty()
-                ? Response.status(Response.Status.BAD_REQUEST).entity(results).build()
-                : Response.ok(results).build();
+        return results.isEmpty()
+                ? Response.status(Response.Status.BAD_REQUEST).entity(
+                new ObjectResponse("Failed", "No vaccines found", null)
+        ).build()
+                : Response.ok(
+                new ObjectResponse("Success", "Vaccines retrieved successfully", results)
+        ).build();
     }
 
     @POST
@@ -148,21 +105,10 @@ public class VaccineController {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Restore vaccine", description = "Restore a deleted vaccine")
     public Response unDeleteVaccineByID(@PathParam("vaccine-id") int vaccineID) {
-        try {
-            VaccineResponseDTO vaccine = vaccineService.undeleteVaccine(vaccineID);
-            return Response.ok(
-                    new ObjectResponse("Success", "Vaccine restored successfully", vaccine)
-            ).build();
-        } catch (ElementNotFoundException | UnchangedStateException e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ObjectResponse("Fail", "Failed to restore vaccine: " + e.getMessage(), null)
-            ).build();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error restoring vaccine", e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ObjectResponse("Fail", "Failed to restore vaccine", null)
-            ).build();
-        }
+        VaccineResponseDTO vaccine = vaccineService.undeleteVaccine(vaccineID);
+        return Response.ok(
+                new ObjectResponse("Success", "Vaccine restored successfully", vaccine)
+        ).build();
     }
 
     @GET
@@ -171,14 +117,10 @@ public class VaccineController {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get vaccine by ID", description = "Retrieve a vaccine by its ID")
     public Response getVaccineByID(@PathParam("vaccine-id") int vaccineID) {
-        Vaccine vaccine = vaccineService.findById(vaccineID);
-        return vaccine != null
-                ? Response.ok(
+        Vaccine vaccine = vaccineService.findById(vaccineID).orElseThrow(() -> new IdNotFoundException("Cannot found Vaccine"));
+        return Response.ok(
                 new ObjectResponse("Success", "Vaccine retrieved successfully",
                         vaccineMapper.vaccineToVaccineResponseDTO(vaccine))
-        ).build()
-                : Response.status(Response.Status.BAD_REQUEST).entity(
-                new ObjectResponse("Fail", "Failed to retrieve vaccine", null)
         ).build();
     }
 
@@ -188,22 +130,10 @@ public class VaccineController {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Create vaccine", description = "Create a new vaccine")
     public Response createVaccine(@Valid VaccineCreateRequest vaccineCreateRequest) {
-        try {
-            VaccineResponseDTO vaccineResponseDTO = vaccineService.createVaccine(vaccineCreateRequest);
-            return Response.ok(
-                    new ObjectResponse("Success", "Vaccine created successfully", vaccineResponseDTO)
-            ).build();
-        } catch (BadRequestException | ElementExistException | ElementNotFoundException e) {
-            LOGGER.log(Level.SEVERE, "Error creating vaccine", e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ObjectResponse("Fail", "Failed to create vaccine: " + e.getMessage(), null)
-            ).build();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error creating vaccine", e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ObjectResponse("Fail", "Failed to create vaccine", null)
-            ).build();
-        }
+        VaccineResponseDTO vaccineResponseDTO = vaccineService.createVaccine(vaccineCreateRequest);
+        return Response.ok(
+                new ObjectResponse("Success", "Vaccine created successfully", vaccineResponseDTO)
+        ).build();
     }
 
     @PUT
@@ -216,26 +146,10 @@ public class VaccineController {
             @PathParam("vaccine-id") int vaccineID,
             @Valid VaccineUpdateRequest vaccineUpdateRequest
     ) {
-        try {
-            VaccineResponseDTO vaccineResponseDTO = vaccineService.updateVaccine(vaccineUpdateRequest, vaccineID);
-            return vaccineResponseDTO != null
-                    ? Response.ok(
-                    new ObjectResponse("Success", "Vaccine updated successfully", vaccineResponseDTO)
-            ).build()
-                    : Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ObjectResponse("Fail", "Failed to update vaccine. Vaccine is null", null)
-            ).build();
-        } catch (BadRequestException | ElementNotFoundException e) {
-            LOGGER.log(Level.SEVERE, "Error updating vaccine", e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ObjectResponse("Fail", "Failed to update vaccine: " + e.getMessage(), null)
-            ).build();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error updating vaccine", e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ObjectResponse("Fail", "Failed to update vaccine", null)
-            ).build();
-        }
+        VaccineResponseDTO vaccineResponseDTO = vaccineService.updateVaccine(vaccineUpdateRequest, vaccineID);
+        return Response.ok(
+                new ObjectResponse("Success", "Vaccine updated successfully", vaccineResponseDTO)
+        ).build();
     }
 
     @DELETE
@@ -244,22 +158,10 @@ public class VaccineController {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Delete vaccine", description = "Delete a vaccine by setting deleted flag")
     public Response deleteVaccineByID(@PathParam("vaccine-id") int vaccineID) {
-        try {
-            VaccineResponseDTO results = vaccineService.deleteVaccine(vaccineID);
-            return Response.ok(
-                    new ObjectResponse("Success", "Vaccine deleted successfully", results)
-            ).build();
-        } catch (ElementNotFoundException e) {
-            LOGGER.log(Level.SEVERE, "Error deleting vaccine", e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ObjectResponse("Fail", "Failed to delete vaccine: " + e.getMessage(), null)
-            ).build();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error deleting vaccine", e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ObjectResponse("Fail", "Failed to delete vaccine", null)
-            ).build();
-        }
+        VaccineResponseDTO results = vaccineService.deleteVaccine(vaccineID);
+        return Response.ok(
+                new ObjectResponse("Success", "Vaccine deleted successfully", results)
+        ).build();
     }
 
     @GET

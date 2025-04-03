@@ -18,7 +18,7 @@ public interface VaccineScheduleDao extends GenericDao<VaccineSchedule, Integer>
     void deleteByStatusAndChildId(VaccineScheduleStatus status, Integer childId);
     List<VaccineSchedule> findByStatusAndChildId(VaccineScheduleStatus status, Integer childId);
     List<VaccineSchedule> findByChildIdAndDateAfterOrderByDateAsc(Integer childId, LocalDateTime date);
-    List<VaccineSchedule> findByCustomer(User customer, int page, int size);
+    List<VaccineSchedule> findByCustomer(User customer);
     boolean existsByDoctorAndDate(User doctor, LocalDateTime date);
     List<VaccineSchedule> findByDeletedIsFalseAndStatusAndDateIsBetweenOrderByDateAsc(
             VaccineScheduleStatus status, LocalDateTime dateAfter, LocalDateTime dateBefore);
