@@ -1,7 +1,7 @@
 package com.vaccinex.service;
 
-import com.sba301.vaccinex.pojo.Vaccine;
-import com.sba301.vaccinex.pojo.VaccineTiming;
+import com.vaccinex.pojo.Vaccine;
+import com.vaccinex.pojo.VaccineTiming;
 
 
 public interface VaccineTimingService {

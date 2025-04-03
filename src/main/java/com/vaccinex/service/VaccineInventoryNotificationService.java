@@ -1,6 +1,7 @@
 package com.vaccinex.service;
 
-import com.sba301.vaccinex.dto.response.VaccineInventoryAlert;
+
+import com.vaccinex.dto.response.VaccineInventoryAlert;
 
 import java.util.List;
 

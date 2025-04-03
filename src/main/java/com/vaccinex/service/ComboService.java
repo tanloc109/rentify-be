@@ -1,12 +1,11 @@
 package com.vaccinex.service;
 
-import com.sba301.vaccinex.dto.internal.PagingRequest;
-import com.sba301.vaccinex.dto.internal.PagingResponse;
-import com.sba301.vaccinex.dto.request.VaccineComboCreateRequest;
-import com.sba301.vaccinex.dto.request.VaccineComboUpdateRequest;
-import com.sba301.vaccinex.dto.response.ComboResponseDTO;
-import com.sba301.vaccinex.pojo.Combo;
-import org.springframework.http.converter.json.MappingJacksonValue;
+import com.vaccinex.dto.paging.PagingRequest;
+import com.vaccinex.dto.paging.PagingResponse;
+import com.vaccinex.dto.request.VaccineComboCreateRequest;
+import com.vaccinex.dto.request.VaccineComboUpdateRequest;
+import com.vaccinex.dto.response.ComboResponseDTO;
+import com.vaccinex.pojo.Combo;
 
 public interface ComboService extends BaseService<Combo, Integer> {
     MappingJacksonValue getAllCombosV2(PagingRequest request);

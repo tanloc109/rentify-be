@@ -1,11 +1,11 @@
 package com.vaccinex.service;
 
-import com.sba301.vaccinex.dto.response.VaccineDTO;
-import com.sba301.vaccinex.dto.request.VaccineCreateRequest;
-import com.sba301.vaccinex.dto.request.VaccineUpdateRequest;
-import com.sba301.vaccinex.dto.internal.PagingResponse;
-import com.sba301.vaccinex.dto.response.VaccineResponseDTO;
-import com.sba301.vaccinex.pojo.Vaccine;
+import com.vaccinex.dto.paging.PagingResponse;
+import com.vaccinex.dto.request.VaccineCreateRequest;
+import com.vaccinex.dto.request.VaccineUpdateRequest;
+import com.vaccinex.dto.response.VaccineDTO;
+import com.vaccinex.dto.response.VaccineResponseDTO;
+import com.vaccinex.pojo.Vaccine;
 
 import java.util.List;
 

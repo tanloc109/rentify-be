@@ -1,10 +1,10 @@
 package com.vaccinex.service;
 
-import com.sba301.vaccinex.dto.request.RoleRequestDTO;
-import com.sba301.vaccinex.dto.response.RoleResponseDTO;
-import com.sba301.vaccinex.exception.ParseEnumException;
-import com.sba301.vaccinex.pojo.Role;
-import com.sba301.vaccinex.pojo.enums.EnumRoleNameType;
+import com.vaccinex.base.exception.ParseEnumException;
+import com.vaccinex.dto.request.RoleRequestDTO;
+import com.vaccinex.dto.response.RoleResponseDTO;
+import com.vaccinex.pojo.Role;
+import com.vaccinex.pojo.enums.EnumRoleNameType;
 
 import java.util.List;
 

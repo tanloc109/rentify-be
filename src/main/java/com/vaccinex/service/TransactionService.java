@@ -1,10 +1,8 @@
 package com.vaccinex.service;
 
-import com.sba301.vaccinex.dto.internal.PagingRequest;
-import com.sba301.vaccinex.dto.request.TransactionCreateRequest;
-import com.sba301.vaccinex.dto.request.TransactionUpdateRequest;
-import com.sba301.vaccinex.pojo.enums.Shift;
-import org.springframework.http.converter.json.MappingJacksonValue;
+import com.vaccinex.dto.paging.PagingRequest;
+import com.vaccinex.dto.request.TransactionCreateRequest;
+import com.vaccinex.dto.request.TransactionUpdateRequest;
 
 public interface TransactionService {
     MappingJacksonValue getAllTransactions(PagingRequest request);

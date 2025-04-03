@@ -1,12 +1,13 @@
 package com.vaccinex.service;
 
-import com.sba301.vaccinex.dto.draft.VaccineScheduleDTO;
-import com.sba301.vaccinex.dto.internal.PagingRequest;
-import com.sba301.vaccinex.dto.internal.PagingResponse;
-import com.sba301.vaccinex.dto.draft.VaccineDraftRequest;
-import com.sba301.vaccinex.dto.response.DoctorScheduleResponse;
-import com.sba301.vaccinex.dto.response.ScheduleDetail;
-import com.sba301.vaccinex.pojo.*;
+
+import com.vaccinex.dto.paging.PagingRequest;
+import com.vaccinex.dto.paging.PagingResponse;
+import com.vaccinex.dto.request.VaccineDraftRequest;
+import com.vaccinex.dto.response.DoctorScheduleResponse;
+import com.vaccinex.dto.response.ScheduleDetail;
+import com.vaccinex.dto.response.VaccineScheduleDTO;
+import com.vaccinex.pojo.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
