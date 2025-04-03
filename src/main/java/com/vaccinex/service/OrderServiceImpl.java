@@ -1,25 +1,25 @@
 package com.vaccinex.service;
 
-import com.sba301.vaccinex.dto.request.OrderRequest;
-import com.sba301.vaccinex.dto.response.OrderDetailResponseDTO;
-import com.sba301.vaccinex.dto.response.OrderSummaryResponseDTO;
-import com.sba301.vaccinex.dto.response.RevenueResponseDTO;
-import com.sba301.vaccinex.dto.response.MonthlyRevenueDTO;
-import com.sba301.vaccinex.exception.EntityNotFoundException;
-import com.sba301.vaccinex.pojo.enums.VaccineScheduleStatus;
-import com.sba301.vaccinex.thirdparty.payment.PaymentService;
-import com.sba301.vaccinex.pojo.*;
-import com.sba301.vaccinex.pojo.enums.OrderStatus;
-import com.sba301.vaccinex.pojo.enums.ServiceType;
-import com.sba301.vaccinex.repository.*;
-import com.sba301.vaccinex.service.spec.*;
-import com.sba301.vaccinex.thirdparty.refund.RefundTransaction;
-import com.sba301.vaccinex.thirdparty.refund.RefundTransactionRepository;
-import com.sba301.vaccinex.thirdparty.refund.VNPayRefundService;
+import com.vaccinex.base.exception.IdNotFoundException;
+import com.vaccinex.dao.OrderDao;
+import com.vaccinex.dao.PaymentDao;
+import com.vaccinex.dao.VaccineScheduleDao;
+import com.vaccinex.dto.request.OrderRequest;
+import com.vaccinex.dto.response.OrderDetailResponseDTO;
+import com.vaccinex.dto.response.OrderSummaryResponseDTO;
+import com.vaccinex.dto.response.RevenueResponseDTO;
+import com.vaccinex.dto.response.MonthlyRevenueDTO;
+import com.vaccinex.pojo.enums.VaccineScheduleStatus;
+import com.vaccinex.thirdparty.payment.PaymentService;
+import com.vaccinex.pojo.*;
+import com.vaccinex.pojo.enums.OrderStatus;
+import com.vaccinex.pojo.enums.ServiceType;
+import com.vaccinex.thirdparty.refund.RefundTransaction;
+import com.vaccinex.thirdparty.refund.RefundTransactionRepository;
+import com.vaccinex.thirdparty.refund.VNPayRefundService;
 import jakarta.ejb.Stateless;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -31,7 +31,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
-    private final OrderRepository orderRepository;
+    private final OrderDao orderRepository;
 
     private final AccountService accountService;
     private final ChildrenService childrenService;
@@ -40,18 +40,18 @@ public class OrderServiceImpl implements OrderService {
     private final PaymentService paymentService;
     private final VNPayRefundService vnPayRefundService;
     private final VaccineScheduleService vaccineScheduleService;
-    private final VaccineScheduleRepository vaccineScheduleRepository;
-    private final PaymentRepository paymentRepository;
+    private final VaccineScheduleDao vaccineScheduleRepository;
+    private final PaymentDao paymentRepository;
     private final RefundTransactionRepository refundTransactionRepository;
 
     @Override
     public Order findById(Integer id) {
-        return orderRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Không tìm thấy đơn hàng"));
+        return orderRepository.findById(id).orElseThrow(() -> new IdNotFoundException("Không tìm thấy đơn hàng"));
     }
 
     @Override
     public Order updateStatus(Integer id, OrderStatus status) {
-        Order order = orderRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Không tìm thấy đơn hàng"));
+        Order order = orderRepository.findById(id).orElseThrow(() -> new IdNotFoundException("Không tìm thấy đơn hàng"));
         order.setStatus(status);
         return orderRepository.save(order);
     }
@@ -85,7 +85,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public VNPayRefundService.RefundResponse refundOrder(Integer orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Order not found"));
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new IdNotFoundException("Order not found"));
         order.setStatus(OrderStatus.CANCELLED);
         return vnPayRefundService.refundForCustomer(findById(orderId));
     }

@@ -1,24 +1,17 @@
 package com.vaccinex.service;
 
-import com.sba301.vaccinex.dto.internal.PagingRequest;
-import com.sba301.vaccinex.dto.paging.TransactionPagingResponse;
-import com.sba301.vaccinex.dto.request.TransactionCreateRequest;
-import com.sba301.vaccinex.dto.request.TransactionUpdateRequest;
-import com.sba301.vaccinex.exception.BadRequestException;
-import com.sba301.vaccinex.pojo.*;
-import com.sba301.vaccinex.pojo.composite.BatchTransactionId;
-import com.sba301.vaccinex.pojo.enums.Shift;
-import com.sba301.vaccinex.pojo.enums.TransactionType;
-import com.sba301.vaccinex.repository.*;
-import com.sba301.vaccinex.service.spec.TransactionService;
-import com.sba301.vaccinex.utils.PaginationUtil;
+import com.vaccinex.base.exception.BadRequestException;
+import com.vaccinex.dao.*;
+import com.vaccinex.dto.paging.PagingRequest;
+import com.vaccinex.dto.paging.TransactionPagingResponse;
+import com.vaccinex.dto.request.TransactionCreateRequest;
+import com.vaccinex.dto.request.TransactionUpdateRequest;
+import com.vaccinex.pojo.*;
+import com.vaccinex.pojo.composite.BatchTransactionId;
+import com.vaccinex.pojo.enums.TransactionType;
+import com.vaccinex.utils.PaginationUtil;
 import jakarta.ejb.Stateless;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.converter.json.MappingJacksonValue;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
@@ -27,15 +20,15 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
 
-    private final TransactionRepository transactionRepository;
-    private final UserRepository userRepository;
-    private final BatchRepository batchRepository;
-    private final VaccineRepository vaccineRepository;
-    private final BatchTransactionRepository batchTransactionRepository;
+    private final TransactionDao transactionRepository;
+    private final UserDao userRepository;
+    private final BatchDao batchRepository;
+    private final VaccineDao vaccineRepository;
+    private final BatchTransactionDao batchTransactionRepository;
 
     @Override
     public MappingJacksonValue getAllTransactions(PagingRequest request) {
-        Pageable pageable = PaginationUtil.getPageable(request);
+        PaginationUtil.Pageable pageable = PaginationUtil.getPageable(request);
         Map<String, String> maps = request.getFilters();
         maps.remove("pageNo");
         maps.remove("pageSize");

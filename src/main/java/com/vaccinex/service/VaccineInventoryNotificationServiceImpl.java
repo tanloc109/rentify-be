@@ -1,18 +1,14 @@
 package com.vaccinex.service;
 
-import com.sba301.vaccinex.dto.response.BatchWithRemaining;
-import com.sba301.vaccinex.dto.response.VaccineInventoryAlert;
-import com.sba301.vaccinex.dto.response.VaccineStockRequirement;
-import com.sba301.vaccinex.pojo.Batch;
-import com.sba301.vaccinex.pojo.Vaccine;
-import com.sba301.vaccinex.pojo.VaccineSchedule;
-import com.sba301.vaccinex.pojo.enums.VaccineScheduleStatus;
-import com.sba301.vaccinex.repository.BatchRepository;
-import com.sba301.vaccinex.repository.VaccineScheduleRepository;
-import com.sba301.vaccinex.service.spec.VaccineInventoryNotificationService;
+import com.vaccinex.dao.VaccineScheduleDao;
+import com.vaccinex.dto.response.BatchWithRemaining;
+import com.vaccinex.dto.response.VaccineInventoryAlert;
+import com.vaccinex.dto.response.VaccineStockRequirement;
+import com.vaccinex.pojo.Vaccine;
+import com.vaccinex.pojo.VaccineSchedule;
+import com.vaccinex.pojo.enums.VaccineScheduleStatus;
 import jakarta.ejb.Stateless;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,8 +23,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class VaccineInventoryNotificationServiceImpl implements VaccineInventoryNotificationService {
 
-    private final VaccineScheduleRepository vaccineScheduleRepository;
-    private final BatchRepository batchRepository;
+    private final VaccineScheduleDao vaccineScheduleRepository;
+    private final BatchDao batchRepository;
 
     @Override
     public List<VaccineInventoryAlert> getVaccineInventoryAlerts(Integer days) {

@@ -1,12 +1,19 @@
 package com.vaccinex.service;
 
-
+import com.vaccinex.base.exception.BadRequestException;
+import com.vaccinex.base.exception.IdNotFoundException;
+import com.vaccinex.dao.ChildrenDao;
+import com.vaccinex.dao.UserDao;
+import com.vaccinex.dao.VaccineComboDao;
+import com.vaccinex.dao.VaccineScheduleDao;
 import com.vaccinex.dto.request.ChildrenRequestDTO;
 import com.vaccinex.dto.response.ChildrenResponseDTO;
 import com.vaccinex.dto.response.InjectionHistoryResponse;
 import com.vaccinex.base.exception.ElementNotFoundException;
 import com.vaccinex.base.exception.ParseEnumException;
 import com.vaccinex.mapper.ChildrenMapper;
+import com.vaccinex.pojo.Child;
+import com.vaccinex.pojo.User;
 import com.vaccinex.pojo.VaccineCombo;
 import com.vaccinex.pojo.VaccineSchedule;
 import com.vaccinex.pojo.composite.VaccineComboId;
@@ -26,16 +33,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ChildrenServiceImpl implements ChildrenService {
 
-    private final ChildrenRepository childRepository;
-    private final UserRepository userRepository;
+    private final ChildrenDao childRepository;
+    private final UserDao userRepository;
     private final JWTToken jwtService;
-    private final VaccineScheduleRepository vaccineScheduleRepository;
-    private final VaccineComboRepository vaccineComboRepository;
+    private final VaccineScheduleDao vaccineScheduleRepository;
+    private final VaccineComboDao vaccineComboRepository;
 
     @Override
     public Child getChildById(Integer id) {
         return childRepository.findByIdAndDeletedIsFalse(id).orElseThrow(
-                () -> new EntityNotFoundException("Cannot find child with id: " + id)
+                () -> new IdNotFoundException("Cannot find child with id: " + id)
         );
     }
 
@@ -88,7 +95,7 @@ public class ChildrenServiceImpl implements ChildrenService {
     @Override
     public ChildrenResponseDTO update(Integer childId, ChildrenRequestDTO dto, HttpServletRequest request) {
         Child child = childRepository.findByIdAndDeletedIsFalse(childId)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find child with id: " + childId));
+                .orElseThrow(() -> new IdNotFound("Cannot find child with id: " + childId));
         String token = request.getHeader("Authorization");
         if (token.startsWith("Bearer ")) {
             token = token.substring(7);
@@ -115,7 +122,7 @@ public class ChildrenServiceImpl implements ChildrenService {
     @Override
     public void deleteById(Integer childId) {
         Child child = childRepository.findByIdAndDeletedIsFalse(childId)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find child with id: " + childId));
+                .orElseThrow(() -> new IdNotFound("Cannot find child with id: " + childId));
         child.setDeleted(true);
         childRepository.save(child);
     }
@@ -160,7 +167,7 @@ public class ChildrenServiceImpl implements ChildrenService {
                 .vaccineId(lastVaccineSchedule.getVaccine().getId())
                 .build();
 
-        VaccineCombo vaccineCombo = vaccineComboRepository.findById(vaccineComboId).orElseThrow(() -> new EntityNotFoundException("Cannot find VaccineCombo with id: " + vaccineComboId));
+        VaccineCombo vaccineCombo = vaccineComboRepository.findById(vaccineComboId).orElseThrow(() -> new IdNotFoundException("Cannot find VaccineCombo with id: " + vaccineComboId));
         Long numberOfDate = vaccineCombo.getIntervalDays();
         LocalDateTime validDate = lastVaccineSchedule.getDate().plusDays(numberOfDate);
         if (validDate.getHour() >= 20) {
@@ -170,7 +177,7 @@ public class ChildrenServiceImpl implements ChildrenService {
     }
 
     private List<InjectionHistoryResponse> getInjectionHistory(Integer id) {
-        Child child = childRepository.findByIdAndDeletedIsFalse(id).orElseThrow(() -> new EntityNotFoundException("Cannot found child with id: " + id));
+        Child child = childRepository.findByIdAndDeletedIsFalse(id).orElseThrow(() -> new IdNotFoundException("Cannot found child with id: " + id));
         List<VaccineSchedule> schedules = child.getSchedules();
 
         LocalDateTime now = LocalDateTime.now();

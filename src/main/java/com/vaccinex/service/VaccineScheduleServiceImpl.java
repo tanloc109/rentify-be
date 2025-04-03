@@ -1,30 +1,22 @@
 package com.vaccinex.service;
 
-import com.sba301.vaccinex.dto.draft.VaccineScheduleDTO;
-import com.sba301.vaccinex.dto.internal.PagingRequest;
-import com.sba301.vaccinex.dto.internal.PagingResponse;
-import com.sba301.vaccinex.dto.draft.VaccineDraftRequest;
-import com.sba301.vaccinex.dto.response.*;
-import com.sba301.vaccinex.exception.BadRequestException;
-import com.sba301.vaccinex.exception.EntityNotFoundException;
-import com.sba301.vaccinex.pojo.*;
-import com.sba301.vaccinex.pojo.composite.VaccineIntervalId;
-import com.sba301.vaccinex.pojo.enums.OrderStatus;
-import com.sba301.vaccinex.pojo.enums.ServiceType;
-import com.sba301.vaccinex.pojo.enums.VaccineScheduleStatus;
-import com.sba301.vaccinex.repository.*;
-import com.sba301.vaccinex.service.spec.AppointmentVerificationService;
-import com.sba301.vaccinex.service.spec.VaccineScheduleService;
-import com.sba301.vaccinex.service.spec.VaccineTimingService;
-import com.sba301.vaccinex.utils.PaginationUtil;
+import com.vaccinex.base.exception.BadRequestException;
+import com.vaccinex.base.exception.IdNotFoundException;
+import com.vaccinex.dao.*;
+import com.vaccinex.dto.paging.PagingRequest;
+import com.vaccinex.dto.paging.PagingResponse;
+import com.vaccinex.dto.request.VaccineDraftRequest;
+import com.vaccinex.dto.response.*;
+import com.vaccinex.pojo.*;
+import com.vaccinex.pojo.composite.VaccineIntervalId;
+import com.vaccinex.pojo.enums.OrderStatus;
+import com.vaccinex.pojo.enums.ServiceType;
+import com.vaccinex.pojo.enums.VaccineScheduleStatus;
+import com.vaccinex.utils.PaginationUtil;
 import jakarta.ejb.Stateless;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import lombok.Value;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -36,17 +28,17 @@ import java.util.*;
 @RequiredArgsConstructor
 public class VaccineScheduleServiceImpl implements VaccineScheduleService {
 
-    private final VaccineScheduleRepository vaccineScheduleRepository;
-    private final TransactionRepository transactionRepository;
+    private final VaccineScheduleDao vaccineScheduleRepository;
+    private final TransactionDao transactionRepository;
 
     private final VaccineTimingService vaccineTimingService;
-    private final OrderRepository orderRepository;
-    private final VaccineRepository vaccineRepository;
-    private final ComboRepository comboRepository;
-    private final UserRepository userRepository;
-    private final BatchTransactionRepository batchTransactionRepository;
-    private final VaccineIntervalRepository vaccineIntervalRepository;
-    private final ChildrenRepository childrenRepository;
+    private final OrderDao orderRepository;
+    private final VaccineDao vaccineRepository;
+    private final ComboDao comboRepository;
+    private final UserDao userRepository;
+    private final BatchTransactionDao batchTransactionRepository;
+    private final VaccineIntervalDao vaccineIntervalRepository;
+    private final ChildrenDao childrenRepository;
     private final AppointmentVerificationService appointmentVerificationService;
 
     @Value("${business.interval-after-active-vaccine}")
@@ -206,7 +198,7 @@ public class VaccineScheduleServiceImpl implements VaccineScheduleService {
     @Override
     public ScheduleDetail getScheduleDetails(Integer detailId) {
         VaccineSchedule schedule = vaccineScheduleRepository.findById(detailId)
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy lịch với ID: " + detailId));
+                .orElseThrow(() -> new IdNotFoundException("Không tìm thấy lịch với ID: " + detailId));
 
         return ScheduleDetail.builder()
                 .id(schedule.getId())
@@ -268,7 +260,7 @@ public class VaccineScheduleServiceImpl implements VaccineScheduleService {
     public Object confirmVaccination(Integer scheduleId, Integer doctorId) {
         // Tìm lịch tiêm theo ID
         VaccineSchedule schedule = vaccineScheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy lịch với ID: " + scheduleId));
+                .orElseThrow(() -> new IdNotFoundException("Không tìm thấy lịch với ID: " + scheduleId));
 
         // Kiểm tra lịch đã được xác nhận trước đó chưa
         if (schedule.getStatus() == VaccineScheduleStatus.COMPLETED) {
@@ -306,7 +298,7 @@ public class VaccineScheduleServiceImpl implements VaccineScheduleService {
     @Transactional
     public void handleCallback(Integer orderId) {
         Order order = orderRepository.findById(orderId).orElseThrow(
-                () -> new EntityNotFoundException("Không tìm thấy đơn hàng với ID: " + orderId)
+                () -> new IdNotFoundException("Không tìm thấy đơn hàng với ID: " + orderId)
         );
         List<VaccineSchedule> draftSchedules = vaccineScheduleRepository.findByStatusAndChildId(VaccineScheduleStatus.DRAFT, order.getChild().getId());
         for (VaccineSchedule schedule : draftSchedules) {
@@ -358,9 +350,9 @@ public class VaccineScheduleServiceImpl implements VaccineScheduleService {
         deleteDraftSchedules(request.childId());
 
         // Find child and doctor
-        Child child = childrenRepository.findById(request.childId()).orElseThrow(() -> new EntityNotFoundException("Không tìm thấy trẻ em với ID: " + request.childId()));
-        User doctor = userRepository.findById(request.doctorId()).orElseThrow(() -> new EntityNotFoundException("Không tìm thấy bác sĩ với ID: " + request.doctorId()));
-        User customer = userRepository.findById(request.customerId()).orElseThrow(() -> new EntityNotFoundException("Không tìm thấy khách hàng với ID: " + request.customerId()));
+        Child child = childrenRepository.findById(request.childId()).orElseThrow(() -> new IdNotFoundException("Không tìm thấy trẻ em với ID: " + request.childId()));
+        User doctor = userRepository.findById(request.doctorId()).orElseThrow(() -> new IdNotFoundException("Không tìm thấy bác sĩ với ID: " + request.doctorId()));
+        User customer = userRepository.findById(request.customerId()).orElseThrow(() -> new IdNotFoundException("Không tìm thấy khách hàng với ID: " + request.customerId()));
 
         List<VaccineSchedule> schedules;
 
@@ -368,7 +360,7 @@ public class VaccineScheduleServiceImpl implements VaccineScheduleService {
 
             // Get vaccines from ids
             List<Vaccine> vaccines = request.ids().stream().map(id -> vaccineRepository.findByIdAndDeletedIsFalse(id).orElseThrow(
-                    () -> new EntityNotFoundException("Không tìm thấy vaccine có ID: " + id)
+                    () -> new IdNotFoundException("Không tìm thấy vaccine có ID: " + id)
             )).toList();
 
             LocalDateTime fourteenDaysAfter = LocalDateTime.now().plusDays(14);
@@ -389,7 +381,7 @@ public class VaccineScheduleServiceImpl implements VaccineScheduleService {
 
             // Get vaccines from combos
             List<Combo> combos = request.ids().stream().map(id -> comboRepository.findByIdAndDeletedIsFalse(id).orElseThrow(
-                    () -> new EntityNotFoundException("Không tìm thấy combo có ID: " + id)
+                    () -> new IdNotFoundException("Không tìm thấy combo có ID: " + id)
             )).toList();
 
             LocalDateTime fourteenDaysAfter = LocalDateTime.now().plusDays(14);

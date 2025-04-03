@@ -1,17 +1,15 @@
 package com.vaccinex.service;
 
-import com.sba301.vaccinex.dto.request.RoleRequestDTO;
-import com.sba301.vaccinex.dto.response.RoleResponseDTO;
-import com.sba301.vaccinex.exception.ElementNotFoundException;
-import com.sba301.vaccinex.exception.ParseEnumException;
-import com.sba301.vaccinex.mapper.RoleMapper;
-import com.sba301.vaccinex.pojo.Role;
-import com.sba301.vaccinex.pojo.enums.EnumRoleNameType;
-import com.sba301.vaccinex.repository.RoleRepository;
-import com.sba301.vaccinex.service.spec.RoleService;
+import com.vaccinex.base.exception.ElementNotFoundException;
+import com.vaccinex.base.exception.ParseEnumException;
+import com.vaccinex.dao.RoleDao;
+import com.vaccinex.dto.request.RoleRequestDTO;
+import com.vaccinex.dto.response.RoleResponseDTO;
+import com.vaccinex.mapper.RoleMapper;
+import com.vaccinex.pojo.Role;
+import com.vaccinex.pojo.enums.EnumRoleNameType;
 import jakarta.ejb.Stateless;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +18,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RoleServiceImpl implements RoleService {
 
-    private final RoleRepository roleRepository;
+    private final RoleDao roleRepository;
 
     @Override
     public List<RoleResponseDTO> findAll() {

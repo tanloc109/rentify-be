@@ -1,47 +1,39 @@
 package com.vaccinex.service;
 
-import com.sba301.vaccinex.dto.internal.PagingRequest;
-import com.sba301.vaccinex.dto.internal.PagingResponse;
-import com.sba301.vaccinex.dto.paging.ComboPagingResponse;
-import com.sba301.vaccinex.dto.request.VaccineComboCreateRequest;
-import com.sba301.vaccinex.dto.request.VaccineComboUpdateRequest;
-import com.sba301.vaccinex.dto.response.ComboResponseDTO;
-import com.sba301.vaccinex.dto.response.VaccineComboResponseDTO;
-import com.sba301.vaccinex.exception.BadRequestException;
-import com.sba301.vaccinex.exception.ElementExistException;
-import com.sba301.vaccinex.exception.ElementNotFoundException;
-import com.sba301.vaccinex.exception.UnchangedStateException;
-import com.sba301.vaccinex.mapper.VaccineMapper;
-import com.sba301.vaccinex.mapper.old.ComboMapper;
-import com.sba301.vaccinex.pojo.Combo;
-import com.sba301.vaccinex.pojo.Vaccine;
-import com.sba301.vaccinex.pojo.VaccineCombo;
-import com.sba301.vaccinex.pojo.VaccineTiming;
-import com.sba301.vaccinex.pojo.composite.VaccineComboId;
-import com.sba301.vaccinex.repository.ComboRepository;
-import com.sba301.vaccinex.service.spec.ComboService;
-import com.sba301.vaccinex.utils.PaginationUtil;
-import com.sba301.vaccinex.utils.VaccineComboSpecification;
+import com.vaccinex.base.exception.ElementExistException;
+import com.vaccinex.base.exception.ElementNotFoundException;
+import com.vaccinex.base.exception.UnchangedStateException;
+import com.vaccinex.dao.ComboDao;
+import com.vaccinex.dto.paging.ComboPagingResponse;
+import com.vaccinex.dto.paging.PagingRequest;
+import com.vaccinex.dto.paging.PagingResponse;
+import com.vaccinex.dto.request.VaccineComboCreateRequest;
+import com.vaccinex.dto.request.VaccineComboUpdateRequest;
+import com.vaccinex.dto.response.ComboResponseDTO;
+import com.vaccinex.dto.response.VaccineComboResponseDTO;
+import com.vaccinex.mapper.ComboMapper;
+import com.vaccinex.mapper.VaccineMapper;
+import com.vaccinex.pojo.Combo;
+import com.vaccinex.pojo.Vaccine;
+import com.vaccinex.pojo.VaccineCombo;
+import com.vaccinex.pojo.VaccineTiming;
+import com.vaccinex.pojo.composite.VaccineComboId;
+import com.vaccinex.utils.PaginationUtil;
+import com.vaccinex.utils.VaccineComboSpecification;
 import jakarta.ejb.Stateless;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.converter.json.MappingJacksonValue;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
 @Stateless
+@RequiredArgsConstructor
 public class ComboServiceImpl extends BaseServiceImpl<Combo, Integer> implements ComboService {
 
-    private final ComboRepository comboRepository;
+    private final ComboDao comboRepository;
     private final ComboMapper comboMapper;
     private final VaccineMapper vaccineMapper;
 
@@ -65,13 +57,6 @@ public class ComboServiceImpl extends BaseServiceImpl<Combo, Integer> implements
 
     @Value("${business.interval-after-inactive-vaccine}")
     private int businessIntervalAfterInactiveVaccine;
-
-    public ComboServiceImpl(ComboRepository comboRepository, ComboMapper comboMapper, VaccineMapper vaccineMapper) {
-        super(comboRepository);
-        this.comboRepository = comboRepository;
-        this.comboMapper = comboMapper;
-        this.vaccineMapper = vaccineMapper;
-    }
 
     @Override
     public MappingJacksonValue getAllCombosV2(PagingRequest request) {

@@ -1,38 +1,30 @@
 package com.vaccinex.service;
 
-import com.sba301.vaccinex.dto.response.VaccineDTO;
-import com.sba301.vaccinex.dto.internal.PagingResponse;
-import com.sba301.vaccinex.dto.request.VaccineCreateRequest;
-import com.sba301.vaccinex.dto.request.VaccineTimingCreateRequest;
-import com.sba301.vaccinex.dto.request.VaccineUpdateRequest;
-import com.sba301.vaccinex.dto.response.VaccineIntervalResponseDTO;
-import com.sba301.vaccinex.dto.response.VaccineResponseDTO;
-import com.sba301.vaccinex.dto.response.VaccineUseResponseDTO;
-import com.sba301.vaccinex.exception.BadRequestException;
-import com.sba301.vaccinex.exception.ElementExistException;
-import com.sba301.vaccinex.exception.ElementNotFoundException;
-import com.sba301.vaccinex.exception.UnchangedStateException;
-import com.sba301.vaccinex.mapper.VaccineMapper;
-import com.sba301.vaccinex.pojo.Vaccine;
-import com.sba301.vaccinex.pojo.VaccineInterval;
-import com.sba301.vaccinex.pojo.VaccineTiming;
-import com.sba301.vaccinex.pojo.VaccineUse;
-import com.sba301.vaccinex.pojo.composite.VaccineIntervalId;
-import com.sba301.vaccinex.repository.VaccineIntervalRepository;
-import com.sba301.vaccinex.repository.VaccineRepository;
-import com.sba301.vaccinex.repository.VaccineTimingRepository;
-import com.sba301.vaccinex.repository.VaccineUseRepository;
-import com.sba301.vaccinex.service.spec.VaccineService;
-import com.sba301.vaccinex.utils.VaccineSpecification;
+import com.vaccinex.base.exception.ElementExistException;
+import com.vaccinex.base.exception.ElementNotFoundException;
+import com.vaccinex.base.exception.UnchangedStateException;
+import com.vaccinex.dao.VaccineDao;
+import com.vaccinex.dao.VaccineIntervalDao;
+import com.vaccinex.dao.VaccineTimingDao;
+import com.vaccinex.dao.VaccineUseDao;
+import com.vaccinex.dto.paging.PagingResponse;
+import com.vaccinex.dto.request.VaccineCreateRequest;
+import com.vaccinex.dto.request.VaccineTimingCreateRequest;
+import com.vaccinex.dto.request.VaccineUpdateRequest;
+import com.vaccinex.dto.response.VaccineDTO;
+import com.vaccinex.dto.response.VaccineIntervalResponseDTO;
+import com.vaccinex.dto.response.VaccineResponseDTO;
+import com.vaccinex.dto.response.VaccineUseResponseDTO;
+import com.vaccinex.mapper.VaccineMapper;
+import com.vaccinex.pojo.Vaccine;
+import com.vaccinex.pojo.VaccineInterval;
+import com.vaccinex.pojo.VaccineTiming;
+import com.vaccinex.pojo.VaccineUse;
+import com.vaccinex.pojo.composite.VaccineIntervalId;
+import com.vaccinex.utils.VaccineSpecification;
 import jakarta.ejb.Stateless;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
+import jakarta.transaction.Transactional;
+import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,11 +33,11 @@ import java.util.stream.Collectors;
 @Stateless
 public class VaccineServiceImpl extends BaseServiceImpl<Vaccine, Integer> implements VaccineService {
 
-    private final VaccineRepository vaccineRepository;
-    private final VaccineUseRepository vaccineUseRepository;
+    private final VaccineDao vaccineRepository;
+    private final VaccineDao vaccineUseRepository;
     private final VaccineMapper vaccineMapper;
-    private final VaccineTimingRepository vaccineTimingRepository;
-    private final VaccineIntervalRepository vaccineIntervalRepository;
+    private final VaccineDao vaccineTimingRepository;
+    private final VaccineDao vaccineIntervalRepository;
 
     @Value("${price.vaccine.below}")
     private String below;
@@ -68,10 +60,10 @@ public class VaccineServiceImpl extends BaseServiceImpl<Vaccine, Integer> implem
     @Value("${business.interval-after-inactive-vaccine}")
     private int businessIntervalAfterInactiveVaccine;
 
-    public VaccineServiceImpl(VaccineRepository vaccineRepository, VaccineMapper vaccineMapper,
-                              VaccineUseRepository vaccineUseRepository,
-                              VaccineTimingRepository vaccineTimingRepository,
-                              VaccineIntervalRepository vaccineIntervalRepository) {
+    public VaccineServiceImpl(VaccineDao vaccineRepository, VaccineMapper vaccineMapper,
+                              VaccineUseDao vaccineUseRepository,
+                              VaccineTimingDao vaccineTimingRepository,
+                              VaccineIntervalDao vaccineIntervalRepository) {
         super(vaccineRepository);
         this.vaccineRepository = vaccineRepository;
         this.vaccineMapper = vaccineMapper;

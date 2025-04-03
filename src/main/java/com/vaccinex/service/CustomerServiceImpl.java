@@ -1,26 +1,24 @@
 package com.vaccinex.service;
 
-import com.sba301.vaccinex.dto.request.CustomerUpdateProfile;
-import com.sba301.vaccinex.dto.request.FeedbackRequestDTO;
-import com.sba301.vaccinex.dto.request.ReactionCreateRequest;
-import com.sba301.vaccinex.dto.response.ChildrenResponseDTO;
-import com.sba301.vaccinex.dto.response.CustomerInfoResponse;
-import com.sba301.vaccinex.dto.response.ReactionCreateResponse;
-import com.sba301.vaccinex.exception.ElementNotFoundException;
-import com.sba301.vaccinex.exception.EntityNotFoundException;
-import com.sba301.vaccinex.mapper.AccountMapper;
-import com.sba301.vaccinex.mapper.ChildrenMapper;
-import com.sba301.vaccinex.pojo.Reaction;
-import com.sba301.vaccinex.pojo.User;
-import com.sba301.vaccinex.pojo.VaccineSchedule;
-import com.sba301.vaccinex.repository.ChildrenRepository;
-import com.sba301.vaccinex.repository.ReactionRepository;
-import com.sba301.vaccinex.repository.UserRepository;
-import com.sba301.vaccinex.repository.VaccineScheduleRepository;
-import com.sba301.vaccinex.service.spec.CustomerService;
+import com.vaccinex.base.exception.ElementNotFoundException;
+import com.vaccinex.base.exception.IdNotFoundException;
+import com.vaccinex.dao.ChildrenDao;
+import com.vaccinex.dao.ReactionDao;
+import com.vaccinex.dao.UserDao;
+import com.vaccinex.dao.VaccineScheduleDao;
+import com.vaccinex.dto.request.CustomerUpdateProfile;
+import com.vaccinex.dto.request.FeedbackRequestDTO;
+import com.vaccinex.dto.request.ReactionCreateRequest;
+import com.vaccinex.dto.response.ChildrenResponseDTO;
+import com.vaccinex.dto.response.CustomerInfoResponse;
+import com.vaccinex.dto.response.ReactionCreateResponse;
+import com.vaccinex.mapper.AccountMapper;
+import com.vaccinex.mapper.ChildrenMapper;
+import com.vaccinex.pojo.Reaction;
+import com.vaccinex.pojo.User;
+import com.vaccinex.pojo.VaccineSchedule;
 import jakarta.ejb.Stateless;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,10 +27,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 
-    private final UserRepository userRepository;
-    private final VaccineScheduleRepository vaccineScheduleRepository;
-    private final ReactionRepository reactionRepository;
-    private final ChildrenRepository childrenRepository;
+    private final UserDao userRepository;
+    private final VaccineScheduleDao vaccineScheduleRepository;
+    private final ReactionDao reactionRepository;
+    private final ChildrenDao childrenRepository;
 
     @Override
     public List<ChildrenResponseDTO> getChildByParentId(Integer parentId) {
@@ -41,14 +39,14 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void updateFeedback(FeedbackRequestDTO feedbackRequestDTO, Integer scheduleId) {
-        VaccineSchedule vaccineSchedule = vaccineScheduleRepository.findById(scheduleId).orElseThrow((() -> new ElementNotFoundException("Không tìm thấy lịch với ID: " + scheduleId)));
+        VaccineSchedule vaccineSchedule = vaccineScheduleRepository.findById(scheduleId).orElseThrow((() -> new ElementNotFoundException("Schedule not found with ID: " + scheduleId)));
         vaccineSchedule.setFeedback(feedbackRequestDTO.getFeedback());
         vaccineScheduleRepository.save(vaccineSchedule);
     }
 
     @Override
     public ReactionCreateResponse createReactionDetail(ReactionCreateRequest reactionCreateRequest, Integer scheduleId) {
-        VaccineSchedule vaccineSchedule = vaccineScheduleRepository.findById(scheduleId).orElseThrow(() -> new ElementNotFoundException("Không tìm thấy lịch với ID: " + scheduleId));
+       VaccineSchedule vaccineSchedule = vaccineScheduleRepository.findById(scheduleId).orElseThrow(() -> new ElementNotFoundException("Schedule not found with ID: " + scheduleId));
         Reaction reaction = Reaction.builder()
                 .date(LocalDateTime.now())
                 .reaction(reactionCreateRequest.reaction())
@@ -68,12 +66,12 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerInfoResponse findUserById(Integer id) {
         return userRepository.findByIdAndDeletedIsFalse(id)
                 .map(AccountMapper.INSTANCE::toCustomerInfoResponse)
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new IdNotFoundException("Customer not found"));
     }
 
     @Override
     public CustomerInfoResponse updateCustomer(Integer customerId, CustomerUpdateProfile request) {
-        User user = userRepository.findByIdAndDeletedIsFalse(customerId).orElseThrow(() -> new EntityNotFoundException("Không tìm thấy người dùng"));
+        User user = userRepository.findByIdAndDeletedIsFalse(customerId).orElseThrow(() -> new IdNotFoundException("Customer not found"));
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setPhone(request.getPhone());

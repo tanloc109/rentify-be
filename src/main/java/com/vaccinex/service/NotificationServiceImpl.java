@@ -1,12 +1,10 @@
 package com.vaccinex.service;
 
-import com.sba301.vaccinex.dto.response.NotificationDTO;
-import com.sba301.vaccinex.pojo.Notification;
-import com.sba301.vaccinex.repository.NotificationRepository;
-import com.sba301.vaccinex.service.spec.NotificationService;
+import com.vaccinex.dto.response.NotificationDTO;
+import com.vaccinex.pojo.Notification;
+import com.vaccinex.dao.NotificationDao;
 import jakarta.ejb.Stateless;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -14,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
-    private final NotificationRepository notificationRepository;
+    private final NotificationDao notificationRepository;
 
     @Override
     public List<NotificationDTO> getNotificationsByUserId(Integer id) {
