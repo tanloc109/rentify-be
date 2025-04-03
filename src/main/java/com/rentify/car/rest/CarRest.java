@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -53,6 +54,7 @@ public class CarRest {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @SecurityRequirement(name = "bearerAuth")
+    @RolesAllowed("RENTER")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Car retrieved successfully"),
             @ApiResponse(responseCode = "400", description = ApplicationMessage.BAD_REQUEST_ERROR),
