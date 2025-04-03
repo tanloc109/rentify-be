@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vaccination Reminder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.4;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #397FE7;
+            color: #ffffff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .content {
+            padding: 10px;
+        }
+
+        .reminder-section {
+            margin-bottom: 10px;
+        }
+
+        .reminder-section p {
+            margin: 5px 0;
+        }
+
+        .company-info {
+            background-color: #f7f7f7;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            font-size: 0.8em;
+        }
+
+        .company-info h3, .company-info h4 {
+            margin: 5px 0;
+        }
+
+        .company-info ul {
+            padding-left: 15px;
+            margin: 5px 0;
+        }
+
+        .company-info li {
+            margin: 3px 0;
+        }
+
+        .footer {
+            background-color: #397FE7;
+            color: #ffffff;
+            padding: 5px;
+            text-align: center;
+            font-size: 0.7em;
+        }
+
+        a {
+            color: #ffffff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header with Title -->
+    <div class="header">
+        <h1>Vaccination Reminder</h1>
+    </div>
+    <!-- Main Content -->
+    <div class="content">
+        <div class="reminder-section">
+            <p>Dear <strong th:text="${reminder.userFullName}">User</strong>,</p>
+            <p>This is a reminder that your child, <strong th:text="${reminder.childFullName}">Child's Name</strong>, is
+                scheduled for the <strong th:text="${reminder.vaccineName}">Vaccine Name</strong> vaccine
+                (<em th:text="${reminder.vaccineCode}">Vaccine Code</em>) on
+                <strong th:text="${#temporals.format(reminder.date, 'dd MMM yyyy HH:mm')}">Date and Time</strong></p>
+            <p th:if="${reminder.comboName != null}">
+                <strong>Combination Package:</strong> <span th:text="${reminder.comboName}">Package Name</span>
+            </p>
+            <p>If you have any questions, please contact Dr. <strong th:text="${reminder.doctorFullName}">Doctor's Name</strong>.</p>
+            <p><strong>Notes:</strong> <em th:text="${reminder.notes}">Additional Notes</em></p>
+        </div>
+        <!-- Company Information Section -->
+        <div class="company-info">
+            <h3>About Us</h3>
+            <p>Welcome to <strong>VaccineX</strong> – A Trusted and Quality Vaccination Center in Ho Chi Minh City.</p>
+            <h4>Our Mission</h4>
+            <p>We are committed to providing high-quality vaccination services, protecting community health and preventing infectious diseases.</p>
+            <h4>Why Choose VaccineX?</h4>
+            <ul>
+                <li><strong>Expert Team:</strong> Experienced medical professionals with dedicated care.</li>
+                <li><strong>Convenient Location:</strong> 79 Dien Bien Phu, Binh Thanh, Ho Chi Minh City.</li>
+                <li><strong>Diverse Services:</strong> Vaccinations for all ages and international travel vaccines.</li>
+                <li><strong>Easy Booking:</strong> Quick and convenient online scheduling system.</li>
+            </ul>
+            <h4>Contact Us</h4>
+            <p>
+                Email: <a href="mailto:info@vaccinex.com">info@vaccinex.com</a><br>
+                Phone: 0123456789<br>
+                Address: 79 Dien Bien Phu, Binh Thanh, Ho Chi Minh City
+            </p>
+        </div>
+    </div>
+    <!-- Footer -->
+    <div class="footer">
+        <p>This is an automated message. Please do not reply.</p>
+    </div>
+</div>
+</body>
+</html>

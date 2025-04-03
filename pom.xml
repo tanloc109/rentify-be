@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.rentify</groupId>
-	<artifactId>Rentify</artifactId>
+	<artifactId>VacicneX</artifactId>
 	<version>0.1.0</version>
 	<packaging>war</packaging>
 	<name>Rentify</name>
@@ -225,7 +225,6 @@
 			<artifactId>jbcrypt</artifactId>
 			<version>0.4</version>
 		</dependency>
-
 	</dependencies>
 
 	<build>

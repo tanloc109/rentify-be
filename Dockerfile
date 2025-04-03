@@ -1,9 +1,15 @@
 FROM maven:3.9.9-amazoncorretto-17-alpine AS builder
+
 WORKDIR /app
+
 VOLUME /root/.m2
+
 COPY pom.xml ./
+
 RUN mvn dependency:go-offline
+
 COPY . .
+
 RUN mvn clean package
 
 #ARG SONAR_PROJECT_KEY=rentify
