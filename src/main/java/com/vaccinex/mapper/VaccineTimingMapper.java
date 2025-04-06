@@ -5,7 +5,7 @@ import com.vaccinex.pojo.VaccineTiming;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "cdi")
 public interface VaccineTimingMapper {
 
     @Mapping(source = "intervalDays", target = "daysAfterPreviousDose")

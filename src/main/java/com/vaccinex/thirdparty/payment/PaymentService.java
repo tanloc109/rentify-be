@@ -1,28 +1,35 @@
 package com.vaccinex.thirdparty.payment;
 
-import com.sba301.vaccinex.exception.BadRequestException;
-import com.sba301.vaccinex.pojo.Order;
-import com.sba301.vaccinex.pojo.Payment;
-import com.sba301.vaccinex.pojo.enums.PaymentMethod;
-import com.sba301.vaccinex.repository.OrderRepository;
-import com.sba301.vaccinex.repository.PaymentRepository;
-import com.sba301.vaccinex.service.spec.VaccineScheduleService;
-import com.sba301.vaccinex.utils.VNPayUtil;
+import com.vaccinex.base.exception.BadRequestException;
+import com.vaccinex.dao.OrderDao;
+import com.vaccinex.dao.PaymentDao;
+import com.vaccinex.pojo.Order;
+import com.vaccinex.pojo.Payment;
+import com.vaccinex.pojo.enums.PaymentMethod;
+import com.vaccinex.service.VaccineScheduleService;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Map;
 
-@Service
-@RequiredArgsConstructor
+@Stateless
 public class PaymentService {
 
-    private final VNPAYConfig vnPayConfig;
-    private final PaymentRepository paymentRepository;
-    private final OrderRepository orderRepository;
-    private final VaccineScheduleService vaccineScheduleService;
+
+    @Inject
+    private VNPAYConfig vnPayConfig;
+
+    @Inject
+    private PaymentDao paymentRepository;
+
+    @Inject
+    private OrderDao orderRepository;
+
+    @Inject
+    private VaccineScheduleService vaccineScheduleService;
 
     public PaymentDTO.VNPayResponse requestPayment(
             Double amount,

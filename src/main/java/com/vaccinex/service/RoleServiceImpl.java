@@ -9,16 +9,17 @@ import com.vaccinex.mapper.RoleMapper;
 import com.vaccinex.pojo.Role;
 import com.vaccinex.pojo.enums.EnumRoleNameType;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
 
 @Stateless
-@RequiredArgsConstructor
 public class RoleServiceImpl implements RoleService {
 
-    private final RoleDao roleRepository;
+    @Inject
+    private RoleDao roleRepository;
 
     @Override
     public List<RoleResponseDTO> findAll() {

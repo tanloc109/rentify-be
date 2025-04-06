@@ -1,4 +1,4 @@
-FROM maven:3.9.9-amazoncorretto-17-alpine AS builder
+FROM maven:3.9.9-amazoncorretto-21-alpine AS builder
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ RUN mvn dependency:go-offline
 
 COPY . .
 
-RUN mvn clean package
+#RUN mvn clean package
 
 #ARG SONAR_PROJECT_KEY=rentify
 #ARG SONAR_PROJECT_NAME=rentify
@@ -20,7 +20,7 @@ RUN mvn clean package
 #RUN mvn sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY} -Dsonar.projectName=${SONAR_PROJECT_NAME} -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_LOGIN} -Dsonar.password=${SONAR_PASSWORD}
 
 # Stage 2: Configure WildFly with PostgreSQL driver and datasource
-FROM quay.io/wildfly/wildfly:29.0.1.Final-jdk17 as wildfly_builder
+FROM quay.io/wildfly/wildfly:35.0.0.Final-jdk21 as wildfly_builder
 
 RUN /opt/jboss/wildfly/bin/add-user.sh root Aavn123!@# --silent
 
@@ -33,10 +33,10 @@ ENV JBOSS_HOME /opt/jboss/wildfly
 ENV VALID_CONNECTION_CHECKER org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker
 
 # Define database environment variables (these will be overridden by docker-compose)
-ARG DB_HOST=jdbc:postgresql://postgres:5432/rentify_dev
-ARG DB_NAME=rentify_dev
+ARG DB_HOST=jdbc:postgresql://postgres:5432/vaccinedb
+ARG DB_NAME=vaccinedb
 ARG DB_USER=postgres
-ARG DB_PASS=Rentify123!@#
+ARG DB_PASS=Vaccinex123!@#
 
 # Install PostgreSQL drivers and configure datasource
 USER root
@@ -60,7 +60,7 @@ FROM wildfly_builder as deployer
 RUN mkdir -p $JBOSS_HOME/standalone/deployments/
 
 # Copy the WAR file from the builder stage
-COPY --from=builder /app/target/rentify.war $JBOSS_HOME/standalone/deployments/
+COPY --from=builder /app/target/vaccinex.war $JBOSS_HOME/standalone/deployments/
 
 # Define the entry point for WildFly
 CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]

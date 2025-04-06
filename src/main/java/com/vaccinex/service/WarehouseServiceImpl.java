@@ -12,6 +12,7 @@ import com.vaccinex.pojo.composite.BatchTransactionId;
 import com.vaccinex.pojo.enums.TransactionType;
 import com.vaccinex.pojo.enums.VaccineScheduleStatus;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -24,13 +25,27 @@ import java.util.*;
 @RequiredArgsConstructor
 public class WarehouseServiceImpl implements WarehouseService {
 
-    private final VaccineScheduleDao vaccineScheduleRepository;
-    private final VaccineDao vaccineRepository;
-    private final VaccineMapper vaccineMapper;
-    private final UserDao userRepository;
-    private final TransactionDao transactionRepository;
-    private final BatchDao batchRepository;
-    private final BatchTransactionDao batchTransactionRepository;
+
+    @Inject
+    private VaccineScheduleDao vaccineScheduleRepository;
+
+    @Inject
+    private VaccineDao vaccineRepository;
+
+    @Inject
+    private VaccineMapper vaccineMapper;
+
+    @Inject
+    private UserDao userRepository;
+
+    @Inject
+    private TransactionDao transactionRepository;
+
+    @Inject
+    private BatchDao batchRepository;
+
+    @Inject
+    private BatchTransactionDao batchTransactionRepository;
 
     /**
      * Report required vaccine doses for morning and afternoon sessions

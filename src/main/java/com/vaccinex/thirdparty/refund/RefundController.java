@@ -1,16 +1,18 @@
 package com.vaccinex.thirdparty.refund;
 
-import com.vaccinex.dto.internal.ObjectResponse;
+import com.vaccinex.dto.response.ObjectResponse;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Response;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
-@RestController
-@RequestMapping("/api/v1/payment/refund")
-@RequiredArgsConstructor
+@Path("/payment/refund")
 public class RefundController {
 
-    private final VNPayRefundService vnPayRefundService;
+    @Inject
+    private VNPayRefundService vnPayRefundService;
 
     @Data
     public static class RefundRequest {
@@ -20,8 +22,9 @@ public class RefundController {
         private String refundedBy;
     }
 
-    @PostMapping("/vnpay")
-    public ResponseEntity<ObjectResponse> refundVnPayTransaction(@RequestBody RefundRequest request) {
+    @POST
+    @Path("/vnpay")
+    public Response refundVnPayTransaction(@RequestBody RefundRequest request) {
         VNPayRefundService.RefundResponse refundResponse = vnPayRefundService.processRefund(
                 request.getPaymentId(),
                 request.getAmount(),
@@ -35,13 +38,14 @@ public class RefundController {
 
         ObjectResponse response = ObjectResponse.builder()
                 .status(refundResponse.isSuccess() ?
-                        HttpStatus.OK.toString() :
-                        HttpStatus.BAD_REQUEST.toString())
+                        Response.ok().toString() :
+                        Response.status(Response.Status.BAD_REQUEST).toString())
                 .message(message)
                 .data(refundResponse)
                 .build();
 
-        return new ResponseEntity<>(response,
-                refundResponse.isSuccess() ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
+        return Response.status(refundResponse.isSuccess() ? Response.Status.OK : Response.Status.BAD_REQUEST)
+                .entity(response)
+                .build();
     }
 }

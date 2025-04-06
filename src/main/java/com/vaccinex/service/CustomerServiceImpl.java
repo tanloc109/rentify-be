@@ -18,19 +18,26 @@ import com.vaccinex.pojo.Reaction;
 import com.vaccinex.pojo.User;
 import com.vaccinex.pojo.VaccineSchedule;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Stateless
-@RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 
-    private final UserDao userRepository;
-    private final VaccineScheduleDao vaccineScheduleRepository;
-    private final ReactionDao reactionRepository;
-    private final ChildrenDao childrenRepository;
+    @Inject
+    private UserDao userRepository;
+
+    @Inject
+    private VaccineScheduleDao vaccineScheduleRepository;
+
+    @Inject
+    private ReactionDao reactionRepository;
+
+    @Inject
+    private ChildrenDao childrenRepository;
 
     @Override
     public List<ChildrenResponseDTO> getChildByParentId(Integer parentId) {

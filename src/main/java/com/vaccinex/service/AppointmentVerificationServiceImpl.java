@@ -12,7 +12,7 @@ import com.vaccinex.pojo.Vaccine;
 import com.vaccinex.pojo.VaccineSchedule;
 import com.vaccinex.pojo.enums.VaccineScheduleStatus;
 import jakarta.ejb.Stateless;
-import lombok.*;
+import jakarta.inject.Inject;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,12 +20,16 @@ import java.util.Collections;
 import java.util.List;
 
 @Stateless
-@RequiredArgsConstructor
 public class AppointmentVerificationServiceImpl implements AppointmentVerificationService {
 
-    private final VaccineDao vaccineRepository;
-    private final VaccineScheduleDao vaccineScheduleRepository;
-    private final BatchDao batchRepository;
+    @Inject
+    private VaccineDao vaccineRepository;
+
+    @Inject
+    private VaccineScheduleDao vaccineScheduleRepository;
+
+    @Inject
+    private BatchDao batchRepository;
 
     // Configurable constants
     private static final int MIN_DAYS_FOR_RESTOCK = 7;

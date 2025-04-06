@@ -22,8 +22,8 @@ import com.vaccinex.pojo.enums.EnumTokenType;
 import com.vaccinex.pojo.enums.Gender;
 import com.vaccinex.pojo.enums.VaccineScheduleStatus;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,14 +31,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Stateless
-@RequiredArgsConstructor
 public class ChildrenServiceImpl implements ChildrenService {
 
-    private final ChildrenDao childRepository;
-    private final UserDao userRepository;
-    private final JwtGenerator jwtService;
-    private final VaccineScheduleDao vaccineScheduleRepository;
-    private final VaccineComboDao vaccineComboRepository;
+    @Inject
+    private ChildrenDao childRepository;
+
+    @Inject
+    private UserDao userRepository;
+
+    @Inject
+    private JwtGenerator jwtService;
+
+    @Inject
+    private VaccineScheduleDao vaccineScheduleRepository;
+
+    @Inject
+    private VaccineComboDao vaccineComboRepository;
 
     @Override
     public Child getChildById(Integer id) {

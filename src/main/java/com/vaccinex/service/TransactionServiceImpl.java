@@ -9,20 +9,30 @@ import com.vaccinex.pojo.*;
 import com.vaccinex.pojo.composite.BatchTransactionId;
 import com.vaccinex.pojo.enums.TransactionType;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Stateless
-@RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
 
-    private final TransactionDao transactionRepository;
-    private final UserDao userRepository;
-    private final BatchDao batchRepository;
-    private final VaccineDao vaccineRepository;
-    private final BatchTransactionDao batchTransactionRepository;
+
+    @Inject
+    private TransactionDao transactionRepository;
+
+    @Inject
+    private UserDao userRepository;
+
+    @Inject
+    private BatchDao batchRepository;
+
+    @Inject
+    private VaccineDao vaccineRepository;
+
+    @Inject
+    private BatchTransactionDao batchTransactionRepository;
 
     @Override
     public List<TransactionResponse> getAllTransactions() {

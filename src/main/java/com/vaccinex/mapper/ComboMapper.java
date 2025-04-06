@@ -14,7 +14,7 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {VaccineUseMapper.class})
+@Mapper(componentModel = "cdi", uses = {VaccineUseMapper.class})
 public interface ComboMapper {
 
     @Mapping(source = "id", target = "id")

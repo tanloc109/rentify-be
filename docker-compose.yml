@@ -7,23 +7,23 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: rentify_dev
+      POSTGRES_DB: vaccinedb
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Rentify123!@#
+      POSTGRES_PASSWORD: VaccineX123!@#
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  rentify:
+  vaccine-api:
     build:
       context: ./
       dockerfile: Dockerfile
-    container_name: rentify-api
+    container_name: vaccine-api
     ports:
       - "8080:8080"
       - "9990:9990"
     environment:
       DATASOURCE_NAME: PostgresDS
-      DATASOURCE_JNDI: java:jboss/jdbc/PostgresDS
+      DATASOURCE_JNDI: java:/PostgresDS
       POSTGRESQL_VERSION: 42.6.0
       JBOSS_HOME: /opt/jboss/wildfly
       VALID_CONNECTION_CHECKER: org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker

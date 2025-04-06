@@ -10,7 +10,7 @@ import com.vaccinex.pojo.Vaccine;
 import com.vaccinex.pojo.VaccineSchedule;
 import com.vaccinex.pojo.enums.VaccineScheduleStatus;
 import jakarta.ejb.Stateless;
-import lombok.RequiredArgsConstructor;
+import jakarta.inject.Inject;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,11 +22,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Stateless
-@RequiredArgsConstructor
 public class VaccineInventoryNotificationServiceImpl implements VaccineInventoryNotificationService {
 
-    private final VaccineScheduleDao vaccineScheduleRepository;
-    private final BatchDao batchRepository;
+
+    @Inject
+    private VaccineScheduleDao vaccineScheduleRepository;
+
+    @Inject
+    private BatchDao batchRepository;
 
     @Override
     public List<VaccineInventoryAlert> getVaccineInventoryAlerts(Integer days) {

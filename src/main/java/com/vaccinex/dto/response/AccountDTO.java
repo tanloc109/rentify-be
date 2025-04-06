@@ -3,10 +3,10 @@ package com.vaccinex.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-@Value
 @NoArgsConstructor(force = true)
 @AllArgsConstructor
 @Builder
+@Value
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AccountDTO {
     int id;

@@ -1,37 +1,38 @@
 package com.vaccinex.thirdparty.payment;
 
-import com.sba301.vaccinex.dto.internal.ObjectResponse;
+import com.vaccinex.dto.response.ObjectResponse;
+import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-@RestController
-@RequestMapping("/api/v1/payment")
+@Path("/payment")
 @RequiredArgsConstructor
 public class PaymentController {
 
-    private final PaymentService paymentService;
+    @Inject
+    private PaymentService paymentService;
 
-    @GetMapping("/vn-pay")
-    public ResponseEntity<ObjectResponse> pay(HttpServletRequest request) {
+    @GET
+    @Path("/vn-pay")
+    public Response pay(HttpServletRequest request) {
         ObjectResponse response = ObjectResponse.builder()
-                .status(HttpStatus.OK.toString())
+                .status("200 OK")
                 .message("Success")
                 .data(paymentService.createVnPayPayment(request))
                 .build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return Response.ok(response).build();
     }
 
-    @GetMapping("/vn-pay-callback")
+    @GET
+    @Path("/vn-pay-callback")
     public void payCallbackHandler(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             paymentService.handleVNPayCallback(request);

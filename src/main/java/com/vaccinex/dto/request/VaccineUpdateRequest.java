@@ -1,7 +1,7 @@
 package com.vaccinex.dto.request;
 
-import com.sba301.vaccinex.dto.response.VaccineIntervalResponseDTO;
-import com.sba301.vaccinex.dto.response.VaccineUseResponseDTO;
+import com.vaccinex.dto.response.VaccineIntervalResponseDTO;
+import com.vaccinex.dto.response.VaccineUseResponseDTO;
 import jakarta.validation.constraints.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

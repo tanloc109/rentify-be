@@ -2,18 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.rentify</groupId>
-	<artifactId>VacicneX</artifactId>
+	<groupId>com.vaccineX</groupId>
+	<artifactId>VaccineX</artifactId>
 	<version>0.1.0</version>
 	<packaging>war</packaging>
-	<name>Rentify</name>
+	<name>VaccineX</name>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.report.sourceEncoding>UTF-8</project.report.sourceEncoding>
-		<maven.compiler.release>17</maven.compiler.release>
+		<maven.compiler.release>21</maven.compiler.release>
 		<jakartaee-api.version>10.0.0</jakartaee-api.version>
-		<compiler-plugin.version>3.13.0</compiler-plugin.version>
+		<compiler-plugin.version>3.14.0</compiler-plugin.version>
 		<war-plugin.version>3.4.0</war-plugin.version>
 		<hibernate-core.version>6.6.3.Final</hibernate-core.version>
 		<postgres.version>42.7.3</postgres.version>
@@ -37,15 +37,15 @@
 		<jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
 		<sonar.exclusions>**/*com/rentify/Rentify.java</sonar.exclusions>
 		<sonar.coverage.exclusions>
-			**/*com/rentify/Rentify.java,
-			**/*com/rentify/configuration/**,
-			**/*com/rentify/exception/**,
-			**/*com/rentify/response/**,
-			**/*com/rentify/utils/**,
-			**/*com/rentify/**/constants/**,
-			**/*com/rentify/**/entity/**,
-			**/*com/rentify/**/dto/**,
-			**/*com/rentify/**/rest/**
+			**/*com/vaccinex/Rentify.java,
+			**/*com/vaccinex/configuration/**,
+			**/*com/vaccinex/exception/**,
+			**/*com/vaccinex/response/**,
+			**/*com/vaccinex/utils/**,
+			**/*com/vaccinex/**/constants/**,
+			**/*com/vaccinex/**/entity/**,
+			**/*com/vaccinex/**/dto/**,
+			**/*com/vaccinex/**/rest/**
 		</sonar.coverage.exclusions>
 		<org.eclipse.microprofile.config>3.1</org.eclipse.microprofile.config>
 	</properties>
@@ -228,15 +228,15 @@
 	</dependencies>
 
 	<build>
-		<finalName>rentify</finalName>
+		<finalName>vaccinex</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${compiler-plugin.version}</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>21</source>
+					<target>21</target>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.mapstruct</groupId>
@@ -280,14 +280,14 @@
 						</goals>
 						<configuration>
 							<excludes>
-								<exclude>**/*com/rentify/Rentify.java</exclude>
-								<exclude>**/*com/rentify/configuration/**</exclude>
-								<exclude>**/*com/rentify/exception/**</exclude>
-								<exclude>**/*com/rentify/response/**</exclude>
-								<exclude>**/*com/rentify/utils/**</exclude>
-								<exclude>**/*com/rentify/**/entity/**</exclude>
-								<exclude>**/*com/rentify/**/dto/**</exclude>
-								<exclude>**/*com/rentify/**/rest/**</exclude>
+								<exclude>**/*com/vaccinex/VaccineX.java</exclude>
+								<exclude>**/*com/vaccinex/configuration/**</exclude>
+								<exclude>**/*com/vaccinex/exception/**</exclude>
+								<exclude>**/*com/vaccinex/response/**</exclude>
+								<exclude>**/*com/vaccinex/utils/**</exclude>
+								<exclude>**/*com/vaccinex/**/entity/**</exclude>
+								<exclude>**/*com/vaccinex/**/dto/**</exclude>
+								<exclude>**/*com/vaccinex/**/rest/**</exclude>
 							</excludes>
 						</configuration>
 					</execution>

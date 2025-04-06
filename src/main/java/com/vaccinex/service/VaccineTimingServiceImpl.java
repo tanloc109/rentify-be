@@ -5,13 +5,15 @@ import com.vaccinex.dao.VaccineTimingDao;
 import com.vaccinex.pojo.Vaccine;
 import com.vaccinex.pojo.VaccineTiming;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
 
 @Stateless
-@RequiredArgsConstructor
 public class VaccineTimingServiceImpl implements VaccineTimingService {
 
-    private final VaccineTimingDao vaccineTimingRepository;
+
+    @Inject
+    private VaccineTimingDao vaccineTimingRepository;
 
     @Override
     public VaccineTiming getVaccineTimingById(Integer id) {
