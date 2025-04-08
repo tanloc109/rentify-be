@@ -5,6 +5,9 @@ import com.vaccinex.dto.request.TransactionUpdateRequest;
 import com.vaccinex.dto.response.ObjectResponse;
 import com.vaccinex.dto.response.TransactionResponse;
 import com.vaccinex.service.TransactionService;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -17,6 +20,13 @@ import java.util.List;
 
 @Path("/transactions")
 @Tag(name = "Transactions", description = "Transaction Management Operations")
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "Bearer",
+        bearerFormat = "JWT"
+)
+@SecurityRequirement(name = "bearerAuth")
 public class TransactionController {
 
     @Inject

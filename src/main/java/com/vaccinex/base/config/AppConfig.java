@@ -60,7 +60,6 @@ public class AppConfig {
         }
     }
 
-    // Price constants
     public static String getPriceVaccineDefault() {
         return getProperty("price.vaccine.default");
     }

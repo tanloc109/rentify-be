@@ -4,6 +4,9 @@ import com.vaccinex.dto.response.ObjectResponse;
 import com.vaccinex.dto.response.VaccineInventoryAlert;
 import com.vaccinex.service.AppointmentVerificationService;
 import com.vaccinex.service.VaccineInventoryNotificationService;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -17,6 +20,12 @@ import java.util.List;
 
 @Path("/inventory")
 @Tag(name = "Inventory", description = "Inventory Management Operations")
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "Bearer",
+        bearerFormat = "JWT"
+)
 public class InventoryNotificationController {
 
     @Inject
@@ -28,6 +37,7 @@ public class InventoryNotificationController {
     @GET
     @Path("/verify-appointment")
     @RolesAllowed({"ADMIN", "STAFF"})
+    @SecurityRequirement(name = "bearerAuth")
     @Produces(MediaType.APPLICATION_JSON)
     public Response verifyAppointmentAvailability(
             @QueryParam("vaccineId") Integer vaccineId,
@@ -51,6 +61,7 @@ public class InventoryNotificationController {
     @GET
     @Path("/vaccine-alerts")
     @RolesAllowed({"ADMIN", "STAFF"})
+    @SecurityRequirement(name = "bearerAuth")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getVaccineInventoryAlerts(@QueryParam("days") Integer days) {
         List<VaccineInventoryAlert> alerts = inventoryNotificationService.getVaccineInventoryAlerts(days);

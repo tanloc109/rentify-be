@@ -10,6 +10,9 @@ import com.vaccinex.dto.response.ComboResponseDTO;
 import com.vaccinex.dto.response.ObjectResponse;
 import com.vaccinex.service.ComboService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -25,6 +28,12 @@ import java.util.logging.Logger;
 
 @Path("/combos")
 @Tag(name = "Combo", description = "Combo Management Operations")
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "Bearer",
+        bearerFormat = "JWT"
+)
 public class ComboController {
     private static final Logger LOGGER = Logger.getLogger(ComboController.class.getName());
 
@@ -33,7 +42,8 @@ public class ComboController {
 
     @GET
     @Operation(summary = "Get all combos", description = "Retrieves all combos")
-    @RolesAllowed({"ADMIN"})
+    @RolesAllowed({"USER","ADMIN"})
+    @SecurityRequirement(name = "bearerAuth")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllCombos() {
         List<ComboResponseDTO> results = comboService.getAllCombos();
@@ -49,6 +59,7 @@ public class ComboController {
     @Path("/active")
     @Operation(summary = "Get all active combos", description = "Retrieves all combos that are active")
     @RolesAllowed({"USER", "ADMIN"})
+    @SecurityRequirement(name = "bearerAuth")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllCombosActive() {
         List<ComboResponseDTO> results = comboService.getAllCombosActive();
@@ -64,6 +75,7 @@ public class ComboController {
     @Path("/search")
     @Operation(summary = "Search active vaccine combos", description = "Retrieves combos filtered by various parameters")
     @RolesAllowed({"USER", "ADMIN"})
+    @SecurityRequirement(name = "bearerAuth")
     @Produces(MediaType.APPLICATION_JSON)
     public Response searchVaccines(
             @QueryParam("name") @DefaultValue("") String name,
@@ -84,6 +96,7 @@ public class ComboController {
     @Path("/{combo-id}/restore")
     @Operation(summary = "Restore combo", description = "Restore combo by setting deleted = false")
     @RolesAllowed({"ADMIN"})
+    @SecurityRequirement(name = "bearerAuth")
     @Produces(MediaType.APPLICATION_JSON)
     public Response unDeleteComboByID(@PathParam("combo-id") int comboID) {
         ComboResponseDTO combo = comboService.undeleteCombo(comboID);
@@ -103,6 +116,7 @@ public class ComboController {
     @POST
     @Operation(summary = "Create combo", description = "Create combo")
     @RolesAllowed({"ADMIN"})
+    @SecurityRequirement(name = "bearerAuth")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createCombo(@Valid VaccineComboCreateRequest vaccineComboCreateRequest) {
@@ -116,6 +130,7 @@ public class ComboController {
     @Path("/{combo-id}")
     @Operation(summary = "Update combo by id", description = "Update combo by id")
     @RolesAllowed({"ADMIN"})
+    @SecurityRequirement(name = "bearerAuth")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateCombo(
@@ -130,6 +145,7 @@ public class ComboController {
     @Path("/{combo-id}")
     @Operation(summary = "Delete combo by id", description = "Delete combo by id and set deleted = true")
     @RolesAllowed({"ADMIN"})
+    @SecurityRequirement(name = "bearerAuth")
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteComboByID(@PathParam("combo-id") int comboID) {
         ComboResponseDTO deletedCombo = comboService.deleteCombo(comboID);

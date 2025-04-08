@@ -6,6 +6,9 @@ import com.vaccinex.dto.request.VaccineReturnRequest;
 
 import com.vaccinex.dto.response.ObjectResponse;
 import com.vaccinex.service.BatchService;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -20,6 +23,12 @@ import java.util.Map;
 
 @Path("/batches")
 @Tag(name = "Batch", description = "Batch Management Operations")
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "Bearer",
+        bearerFormat = "JWT"
+)
 public class BatchController {
 
     @Inject
@@ -28,6 +37,7 @@ public class BatchController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"ADMIN", "STAFF", "DOCTOR"})
+    @SecurityRequirement(name = "bearerAuth")
     public Response getAllBatches(
             @Context UriInfo uriInfo,
             @QueryParam("pageNo") @DefaultValue("1") Integer pageNo,
@@ -45,6 +55,7 @@ public class BatchController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"ADMIN", "STAFF"})
+    @SecurityRequirement(name = "bearerAuth")
     public Response createBatch(BatchCreateRequest batchCreateRequest) {
         batchService.createBatch(batchCreateRequest);
         return Response
@@ -63,6 +74,7 @@ public class BatchController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"ADMIN", "STAFF"})
+    @SecurityRequirement(name = "bearerAuth")
     public Response updateBatch(
             @PathParam("batchId") Integer batchId,
             BatchUpdateRequest request
@@ -83,6 +95,7 @@ public class BatchController {
     @Path("/{batchId}")
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"ADMIN", "STAFF"})
+    @SecurityRequirement(name = "bearerAuth")
     public Response deleteBatch(
             @PathParam("batchId") Integer batchId
     ) {
@@ -104,6 +117,7 @@ public class BatchController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"ADMIN", "STAFF"})
+    @SecurityRequirement(name = "bearerAuth")
     public Response returnVaccine(VaccineReturnRequest request) {
         batchService.returnVaccine(request);
         return Response

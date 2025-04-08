@@ -8,11 +8,10 @@ import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.ApplicationPath;
 
 @ApplicationScoped
-@ApplicationPath("/api/v1")
+@ApplicationPath("api/v1")
 @OpenAPIDefinition(
         info = @Info(title = "Vaccine X API", version = "0.1.0", description = "API Documentation"),
-        servers = @Server(url = "http://localhost:8080/vaccineX/")
-
+        servers = @Server(url = "http://localhost:8080/vaccinex/")
 )
 public class VaccineX extends Application {
 

@@ -22,13 +22,13 @@ public class Vaccine extends BaseEntity {
 
     String name;
 
-    @Column(columnDefinition = "NVARCHAR(1000)")
+    @Column(columnDefinition = "VARCHAR(1000)")
     String description;
 
-    @Column(name = "vaccine_code", nullable = false, unique = true, columnDefinition = "NVARCHAR(255)")
+    @Column(name = "vaccine_code", nullable = false, unique = true, columnDefinition = "VARCHAR(255)")
     String vaccineCode;
 
-    @Column(columnDefinition = "NVARCHAR(255)")
+    @Column(columnDefinition = "VARCHAR(255)")
     String manufacturer;
 
     Double price;

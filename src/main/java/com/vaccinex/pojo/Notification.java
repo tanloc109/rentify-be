@@ -19,7 +19,7 @@ public class Notification extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    @Column(columnDefinition = "NVARCHAR(1000)")
+    @Column(columnDefinition = "VARCHAR(1000)")
     String message;
 
     LocalDateTime date;

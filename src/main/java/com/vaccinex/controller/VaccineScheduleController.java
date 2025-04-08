@@ -3,6 +3,9 @@ package com.vaccinex.controller;
 import com.vaccinex.dto.request.VaccineDraftRequest;
 import com.vaccinex.dto.response.ObjectResponse;
 import com.vaccinex.service.VaccineScheduleService;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -17,6 +20,13 @@ import java.time.format.DateTimeFormatter;
 
 @Path("/schedules")
 @Tag(name = "Vaccine Schedule", description = "Vaccine Schedule Management Operations")
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "Bearer",
+        bearerFormat = "JWT"
+)
+@SecurityRequirement(name = "bearerAuth")
 public class VaccineScheduleController {
 
     @Inject

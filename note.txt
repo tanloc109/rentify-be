@@ -1,0 +1,1 @@
+http://localhost:8080/vaccinex/api/v1/openapi.json

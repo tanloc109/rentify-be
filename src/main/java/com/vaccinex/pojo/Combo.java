@@ -19,10 +19,10 @@ public class Combo extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    @Column(name = "name", nullable = false, unique = true, columnDefinition = "NVARCHAR(255)")
+    @Column(name = "name", nullable = false, unique = true, columnDefinition = "VARCHAR(255)")
     String name;
 
-    @Column(columnDefinition = "NVARCHAR(1000)")
+    @Column(columnDefinition = "VARCHAR(1000)")
     String description;
 
     Double price;

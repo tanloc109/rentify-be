@@ -34,14 +34,6 @@ public class VNPAYConfig {
         this.orderType = AppConfig.getProperty("payment.vnPay.orderType");
     }
 
-    public VNPAYConfig(String vnpTmnCode) {
-        this(); // Call the default constructor to initialize fields
-        // Override tmnCode if provided
-        if (vnpTmnCode != null && !vnpTmnCode.isEmpty()) {
-            this.vnp_TmnCode = vnpTmnCode;
-        }
-    }
-
     public Map<String, String> getVNPayConfig() {
         Map<String, String> vnpParamsMap = new HashMap<>();
         vnpParamsMap.put("vnp_Version", this.vnp_Version);

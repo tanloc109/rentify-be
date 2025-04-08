@@ -2,6 +2,7 @@ package com.vaccinex.thirdparty.refund;
 
 import com.vaccinex.dto.response.ObjectResponse;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -24,6 +25,7 @@ public class RefundController {
 
     @POST
     @Path("/vnpay")
+    @PermitAll
     public Response refundVnPayTransaction(@RequestBody RefundRequest request) {
         VNPayRefundService.RefundResponse refundResponse = vnPayRefundService.processRefund(
                 request.getPaymentId(),

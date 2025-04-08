@@ -44,9 +44,9 @@ public class PaymentService {
         long amountInVND = Math.round(amount * 100);
         vnpParamsMap.put("vnp_Amount", String.valueOf(amountInVND));
 
-        if (bankCode != null && !bankCode.isEmpty()) {
-            vnpParamsMap.put("vnp_BankCode", bankCode);
-        }
+//        if (bankCode != null && !bankCode.isEmpty()) {
+//            vnpParamsMap.put("vnp_BankCode", bankCode);
+//        }
 
         vnpParamsMap.put("vnp_IpAddr", VNPayUtil.getIpAddress(request));
 
@@ -57,25 +57,28 @@ public class PaymentService {
 
     public void handleVNPayCallback(HttpServletRequest request) {
         String responseCode = request.getParameter("vnp_ResponseCode");
+        System.out.println("responseCode = " + responseCode);
         String txnRef = request.getParameter("vnp_TxnRef");
+        String orderInfo = request.getParameter("vnp_OrderInfo");
         String transactionNo = request.getParameter("vnp_TransactionNo");
-
+        System.out.println("txnRef = " + txnRef);
         //Thanh toán thất bại
         if (!"00".equals(responseCode)) {
             throw new BadRequestException("Thanh toán không thành công với mã phản hồi:" + responseCode);
         }
 
         Integer orderId = Integer.parseInt(request.getParameter("vnp_OrderInfo"));
-
+        System.out.println("orderId = " + orderId);
         Order order = orderRepository.findById(orderId).orElseThrow(
                 () -> new BadRequestException("Không tìm thấy lệnh với txnRef: " + txnRef)
         );
-        String amount = request.getParameter("vnp_Amount");
+            String amount = request.getParameter("vnp_Amount");
+        System.out.println("amount = " + amount);
         // Thanh toán thành công
         paymentRepository.save(Payment.builder()
                 .paymentMethod(PaymentMethod.VNPAY)
                 .date(LocalDateTime.now())
-                .amount(Double.parseDouble(amount))
+                .amount(Double.parseDouble(amount) / 100)
                 .customer(order.getCustomer())
                 .vnpTransactionNo(transactionNo)
                 .vnpTxnRef(request.getParameter("vnp_TxnRef"))

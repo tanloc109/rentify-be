@@ -24,10 +24,10 @@ public class Child extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    @Column(columnDefinition = "NVARCHAR(255)")
+    @Column(columnDefinition = "VARCHAR(255)")
     String firstName;
 
-    @Column(columnDefinition = "NVARCHAR(255)")
+    @Column(columnDefinition = "VARCHAR(255)")
     String lastName;
 
     LocalDate dob;
@@ -39,10 +39,10 @@ public class Child extends BaseEntity {
 
     Double height;
 
-    @Column(columnDefinition = "NVARCHAR(10)")
+    @Column(columnDefinition = "VARCHAR(10)")
     String bloodType;
 
-    @Column(columnDefinition = "NVARCHAR(1000)")
+    @Column(columnDefinition = "VARCHAR(1000)")
     String healthNote;
 
     @ManyToOne

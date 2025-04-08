@@ -7,6 +7,8 @@ import com.vaccinex.dto.response.AccountDTO;
 import com.vaccinex.dto.response.ObjectResponse;
 import com.vaccinex.dto.response.TokenResponse;
 import com.vaccinex.service.AccountService;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;

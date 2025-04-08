@@ -7,6 +7,9 @@ import com.vaccinex.dto.response.ChildrenResponseDTO;
 import com.vaccinex.dto.response.ObjectResponse;
 import com.vaccinex.service.ChildrenService;
 import com.vaccinex.service.VaccineScheduleService;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -21,6 +24,12 @@ import java.util.List;
 
 @Path("/children")
 @Tag(name = "Children", description = "Children Management Operations")
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "Bearer",
+        bearerFormat = "JWT"
+)
 public class ChildrenController {
 
     @Inject
@@ -32,6 +41,7 @@ public class ChildrenController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"ADMIN"})
+    @SecurityRequirement(name = "bearerAuth")
     public Response getAllChildren() {
         List<ChildrenResponseDTO> children = childService.findAll();
         return Response.ok(
@@ -47,6 +57,7 @@ public class ChildrenController {
     @Path("/{childrenId}")
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"USER", "DOCTOR", "ADMIN"})
+    @SecurityRequirement(name = "bearerAuth")
     public Response getChildById(@PathParam("childrenId") Integer childrenId) {
         ChildrenResponseDTO child = childService.findById(childrenId);
         return Response.ok(
@@ -62,6 +73,7 @@ public class ChildrenController {
     @Path("/parent")
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"USER", "ADMIN"})
+    @SecurityRequirement(name = "bearerAuth")
     public Response getChildrenByParentId(@Context HttpServletRequest request) {
         List<ChildrenResponseDTO> children = childService.findByParentId(request);
         return Response.ok(
@@ -77,10 +89,12 @@ public class ChildrenController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"USER", "ADMIN"})
+    @SecurityRequirement(name = "bearerAuth")
     public Response createNewChild(
             @Valid ChildrenRequestDTO dto,
             @Context HttpServletRequest request
     ) throws ParseEnumException {
+        System.out.println("Creating new child with request: " + dto);
         ChildrenResponseDTO createdChild = childService.createChild(dto, request);
         return Response.status(Response.Status.CREATED).entity(
                 ObjectResponse.builder()
@@ -96,6 +110,7 @@ public class ChildrenController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"USER", "ADMIN"})
+    @SecurityRequirement(name = "bearerAuth")
     public Response updateChild(
             @PathParam("childrenId") Integer childrenId,
             @Valid ChildrenRequestDTO dto,
@@ -115,6 +130,7 @@ public class ChildrenController {
     @Path("/{childrenId}")
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"USER", "ADMIN"})
+    @SecurityRequirement(name = "bearerAuth")
     public Response deleteChildById(@PathParam("childrenId") Integer childrenId) {
         childService.deleteById(childrenId);
         return Response.ok(
@@ -129,6 +145,7 @@ public class ChildrenController {
     @Path("/{childId}/schedules/availability")
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"USER"})
+    @SecurityRequirement(name = "bearerAuth")
     public Response getEarliestPossibleSchedule(@PathParam("childId") Integer childId) {
         return Response.ok(
                 ObjectResponse.builder()
@@ -143,6 +160,7 @@ public class ChildrenController {
     @Path("/{childId}/schedules/draft")
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"USER", "ADMIN"})
+    @SecurityRequirement(name = "bearerAuth")
     public Response getDraftSchedules(@PathParam("childId") Integer childId) {
         return Response.ok(
                 ObjectResponse.builder()
@@ -157,6 +175,7 @@ public class ChildrenController {
     @Path("/{childId}/schedules/drafts")
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"USER", "ADMIN"})
+    @SecurityRequirement(name = "bearerAuth")
     public Response deleteDraftSchedules(@PathParam("childId") Integer childId) {
         vaccineScheduleService.deleteDraftSchedules(childId);
         return Response.ok(

@@ -41,10 +41,9 @@ public class VNPayRefundService {
     @Inject
     private VaccineScheduleDao vaccineScheduleRepository;
 
-    private Client client;
+    private final Client client;
 
-    @Inject
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     public VNPayRefundService() {
         this.client = ClientBuilder.newClient();

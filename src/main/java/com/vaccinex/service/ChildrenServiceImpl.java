@@ -74,10 +74,12 @@ public class ChildrenServiceImpl implements ChildrenService {
 
     @Override
     public ChildrenResponseDTO createChild(ChildrenRequestDTO dto, HttpServletRequest request) throws ParseEnumException {
+        System.out.println("dto = " + dto);
         String token = request.getHeader("Authorization");
         if (token.startsWith("Bearer ")) {
             token = token.substring(7);
         }
+        System.out.println(token + " = token");
         String email = jwtService.getEmailFromJwt(token, EnumTokenType.TOKEN);
         User customer = userRepository.getAccountByEmailAndDeletedIsFalse(email)
                 .orElseThrow(() -> new ElementNotFoundException("Cannot find user with email: " + email));

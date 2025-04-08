@@ -22,10 +22,10 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    @Column(columnDefinition = "NVARCHAR(255)")
+    @Column(columnDefinition = "VARCHAR(255)")
     String firstName;
 
-    @Column(columnDefinition = "NVARCHAR(255)")
+    @Column(columnDefinition = "VARCHAR(255)")
     String lastName;
 
     @Column(unique = true, nullable = false)
@@ -39,7 +39,7 @@ public class User extends BaseEntity {
     @Builder.Default
     boolean enabled = true;
 
-    @Column(columnDefinition = "NVARCHAR(1000)")
+    @Column(columnDefinition = "VARCHAR(1000)")
     String address;
 
     LocalDate dob;

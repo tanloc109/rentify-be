@@ -1,6 +1,7 @@
 package com.vaccinex.service;
 
 import com.vaccinex.base.filter.AuthenticationFilter;
+import com.vaccinex.base.security.CustomAccountDetail;
 import com.vaccinex.base.security.JwtGenerator;
 import com.vaccinex.dao.UserDao;
 import com.vaccinex.dto.request.AccountRegisterRequest;
@@ -121,57 +122,56 @@ public class AccountServiceImpl extends BaseServiceImpl<User, Integer> implement
                 .message("Login failed")
                 .build();
 
-        // Using Jakarta Security for authentication
-        AuthenticationStatus status = securityContext.authenticate(
-                null,
-                null,
-                AuthenticationParameters.withParams()
-                        .credential(new UsernamePasswordCredential(email, password))
-        );
+        User user = userRepository.getAccountByEmail(email);
+        if (user == null) {
+            return tokenResponse;
+        }
 
-//        if (status == AuthenticationStatus.SUCCESS) {
-//            CustomAccountDetail accountDetail = (CustomAccountDetail) securityContext.getCallerPrincipal();
-//
-//            String token = jwtToken.generatedToken(accountDetail);
-//            String refreshToken = jwtToken.generatedRefreshToken(accountDetail);
-//            User user = userRepository.getAccountByEmail(accountDetail.getEmail());
-//
-//            if (user != null) {
-//                user.setRefreshToken(refreshToken);
-//                user.setAccessToken(token);
-//                userRepository.save(user);
-//                tokenResponse = TokenResponse.builder()
-//                        .code("Success")
-//                        .message("Success")
-//                        .userId(user.getId())
-//                        .firstName(user.getFirstName())
-//                        .lastName(user.getLastName())
-//                        .token(token)
-//                        .refreshToken(refreshToken)
-//                        .build();
-//            }
-//        }
+        if (!BCrypt.checkpw(password, user.getPassword())) {
+            return tokenResponse;
+        }
 
-        return tokenResponse;
+        // Tạo CustomAccountDetail từ user
+        CustomAccountDetail accountDetail = CustomAccountDetail.mapAccountToAccountDetail(user);
+
+        String token = jwtToken.generatedToken(accountDetail);
+        String refreshToken = jwtToken.generatedRefreshToken(accountDetail);
+
+        user.setRefreshToken(refreshToken);
+        user.setAccessToken(token);
+        userRepository.save(user);
+
+        return TokenResponse.builder()
+                .code("Success")
+                .message("Success")
+                .userId(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .token(token)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     @Override
     @Transactional
     public boolean logout(HttpServletRequest request) {
-//        String token = jwtAuthenticationFilter.getToken(request);
-//        String email = jwtToken.getEmailFromJwt(token, EnumTokenType.TOKEN);
-//        User user = userRepository.getAccountByEmail(email);
-//
-//        if (user == null) {
-//            throw new ElementNotFoundException("Account not found");
-//        }
-//
-//        user.setAccessToken(null);
-//        user.setRefreshToken(null);
-//        User checkUser = userRepository.save(user);
-//
-//        return checkUser.getAccessToken() == null;
-        return true;
+        String token = jwtAuthenticationFilter.getTokenFromHeader(request);
+        if (token == null) {
+            return false;
+        }
+
+        String email = jwtToken.getEmailFromJwt(token, EnumTokenType.TOKEN);
+        User user = userRepository.getAccountByEmail(email);
+
+        if (user == null) {
+            throw new ElementNotFoundException("Account not found");
+        }
+
+        user.setAccessToken(null);
+        user.setRefreshToken(null);
+        User checkUser = userRepository.save(user);
+
+        return checkUser.getAccessToken() == null;
     }
 
     @Override

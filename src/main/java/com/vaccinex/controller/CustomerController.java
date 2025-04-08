@@ -9,6 +9,9 @@ import com.vaccinex.dto.response.CustomerScheduleResponse;
 import com.vaccinex.dto.response.ObjectResponse;
 import com.vaccinex.service.CustomerService;
 import com.vaccinex.service.VaccineScheduleService;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -23,6 +26,12 @@ import java.util.logging.Logger;
 
 @Path("/customers")
 @Tag(name = "Customer", description = "Customer Management Operations")
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "Bearer",
+        bearerFormat = "JWT"
+)
 public class CustomerController {
     private static final Logger LOGGER = Logger.getLogger(CustomerController.class.getName());
 
@@ -35,6 +44,7 @@ public class CustomerController {
     @GET
     @Path("/{customerId}/children")
     @RolesAllowed("USER")
+    @SecurityRequirement(name = "bearerAuth")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getChildrenByParentId(@PathParam("customerId") Integer customerId) {
         List<ChildrenResponseDTO> children = parentService.getChildByParentId(customerId);
@@ -44,6 +54,7 @@ public class CustomerController {
     @PUT
     @Path("/schedules/{scheduleId}/feedback")
     @RolesAllowed("USER")
+    @SecurityRequirement(name = "bearerAuth")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateFeedback(
@@ -62,6 +73,7 @@ public class CustomerController {
     @POST
     @Path("/schedules/{scheduleId}/reaction")
     @RolesAllowed({"DOCTOR", "USER"})
+    @SecurityRequirement(name = "bearerAuth")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createReaction(
@@ -80,6 +92,7 @@ public class CustomerController {
     @GET
     @Path("/{customerId}/schedules")
     @RolesAllowed("USER")
+    @SecurityRequirement(name = "bearerAuth")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getSchedules(@PathParam("customerId") Integer customerId) {
         List<CustomerScheduleResponse> schedules = vaccineScheduleService.getVaccinesByCustomer(customerId);

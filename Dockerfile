@@ -10,7 +10,8 @@ RUN mvn dependency:go-offline
 
 COPY . .
 
-#RUN mvn clean package
+RUN mvn clean package
+
 
 #ARG SONAR_PROJECT_KEY=rentify
 #ARG SONAR_PROJECT_NAME=rentify

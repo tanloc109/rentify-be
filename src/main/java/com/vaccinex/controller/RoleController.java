@@ -4,6 +4,9 @@ import com.vaccinex.dto.request.RoleRequestDTO;
 import com.vaccinex.dto.response.RoleResponseDTO;
 
 import com.vaccinex.service.RoleService;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -16,6 +19,13 @@ import java.util.logging.Logger;
 
 @Path("/roles")
 @Tag(name = "Role", description = "Role Management Operations")
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "Bearer",
+        bearerFormat = "JWT"
+)
+@SecurityRequirement(name = "bearerAuth")
 public class RoleController {
     private static final Logger LOGGER = Logger.getLogger(RoleController.class.getName());
 
@@ -60,6 +70,7 @@ public class RoleController {
     @DELETE
     @Path("/{roleId}")
     @Produces(MediaType.APPLICATION_JSON)
+    @SecurityRequirement(name = "bearerAuth")
     public Response deleteRoleById(@PathParam("roleId") Integer roleId) {
         roleService.deleteById(roleId);
         return Response.status(Response.Status.NO_CONTENT).build();

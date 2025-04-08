@@ -97,7 +97,7 @@ public class OrderServiceImpl implements OrderService {
                 .child(child)
                 .build();
         order = orderRepository.save(order);
-        return paymentService.requestPayment(totalPrice, "NCB", order.getId(), http);
+        return paymentService.requestPayment(totalPrice, "", order.getId(), http);
     }
 
     @Override

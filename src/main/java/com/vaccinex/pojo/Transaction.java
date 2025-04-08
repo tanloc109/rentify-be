@@ -21,7 +21,6 @@ public class Transaction extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    @Column(columnDefinition = "DATETIME2(0)")
     LocalDateTime date;
 
     @Enumerated(EnumType.STRING)

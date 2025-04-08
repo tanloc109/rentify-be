@@ -9,6 +9,9 @@ import com.vaccinex.mapper.VaccineUseMapper;
 import com.vaccinex.pojo.VaccineUse;
 import com.vaccinex.service.VaccineUseService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -21,6 +24,13 @@ import java.util.List;
 
 @Path("/purposes")
 @Tag(name = "Purpose", description = "Purpose Management Operations")
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "Bearer",
+        bearerFormat = "JWT"
+)
+@SecurityRequirement(name = "bearerAuth")
 public class VaccineUseController {
 
     @Inject

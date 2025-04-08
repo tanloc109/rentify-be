@@ -5,7 +5,10 @@ import com.vaccinex.dto.response.ObjectResponse;
 import com.vaccinex.service.AccountService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.annotation.security.RolesAllowed;
@@ -22,6 +25,12 @@ import java.util.List;
 @Path("/doctors")
 @Tag(name = "Doctors", description = "Operations related to doctors")
 @ApplicationScoped
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "Bearer",
+        bearerFormat = "JWT"
+)
 public class AccountController {
 
     @Inject
@@ -39,6 +48,7 @@ public class AccountController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
+    @SecurityRequirement(name = "bearerAuth")
     public Response getAllDoctors() {
         List<DoctorResponseDTO> doctors = accountService.findAllDoctors();
 

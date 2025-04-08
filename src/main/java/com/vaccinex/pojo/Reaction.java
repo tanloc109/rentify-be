@@ -21,10 +21,10 @@ public class Reaction extends BaseEntity {
 
     LocalDateTime date;
 
-    @Column(columnDefinition = "NVARCHAR(255)")
+    @Column(columnDefinition = "VARCHAR(255)")
     String reaction;
 
-    @Column(columnDefinition = "NVARCHAR(255)")
+    @Column(columnDefinition = "VARCHAR(255)")
     String reportedBy;
 
     @ManyToOne

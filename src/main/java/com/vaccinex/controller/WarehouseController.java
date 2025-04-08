@@ -4,7 +4,10 @@ import com.vaccinex.dto.request.ExportVaccineRequest;
 import com.vaccinex.dto.response.ObjectResponse;
 import com.vaccinex.service.WarehouseService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.annotation.security.RolesAllowed;
@@ -18,6 +21,13 @@ import java.time.LocalDate;
 
 @Path("/warehouses")
 @Tag(name = "Warehouse", description = "Operations related to warehouse management")
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "Bearer",
+        bearerFormat = "JWT"
+)
+@SecurityRequirement(name = "bearerAuth")
 @ApplicationScoped
 public class WarehouseController {
 
@@ -40,8 +50,9 @@ public class WarehouseController {
     public Response getVaccineReports(
             @QueryParam("doctorId") Integer doctorId,
             @QueryParam("shift") String shift,
-            @QueryParam("date") LocalDate date) {
+            @QueryParam("date") String dateStr) {
 
+        LocalDate date = (dateStr != null) ? LocalDate.parse(dateStr) : null;
         ObjectResponse response = ObjectResponse.builder()
                 .status(Response.Status.OK.toString())
                 .message("Vaccine dose report for morning/afternoon shift")

@@ -3,6 +3,9 @@ package com.vaccinex.controller;
 import com.vaccinex.dto.response.ObjectResponse;
 import com.vaccinex.service.BatchJobService;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -14,6 +17,12 @@ import jakarta.ws.rs.core.Response;
 
 @Path("/batch-jobs")
 @Tag(name = "Batch Job", description = "Batch Job Management Operations")
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "Bearer",
+        bearerFormat = "JWT"
+)
 public class BatchJobController {
 
     @Inject
@@ -23,6 +32,7 @@ public class BatchJobController {
     @Path("/reminders")
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"ADMIN"})
+    @SecurityRequirement(name = "bearerAuth")
     public Response sendMail() {
         batchJobService.remindVaccineSchedules();
         return Response.ok(
@@ -37,6 +47,7 @@ public class BatchJobController {
     @Path("/batch-assignment")
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"ADMIN"})
+    @SecurityRequirement(name = "bearerAuth")
     public Response assignBatches() {
         batchJobService.assignBatchToSchedules();
         return Response.ok(

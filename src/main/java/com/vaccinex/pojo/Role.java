@@ -22,7 +22,7 @@ public class Role extends BaseEntity{
     @Enumerated(EnumType.STRING)
     EnumRoleNameType roleName;
 
-    @Column(columnDefinition = "NVARCHAR(255)")
+    @Column(columnDefinition = "VARCHAR(255)")
     String displayName;
 
     @OneToMany(mappedBy = "role")

@@ -17,27 +17,25 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Batch extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    @Column(unique = true, columnDefinition = "NVARCHAR(255)")
+    @Column(unique = true, columnDefinition = "VARCHAR(255)")
     String batchCode;
 
     Integer batchSize;
 
     Integer quantity;
 
-    @Column(columnDefinition = "DATETIME2(0)")
     LocalDateTime manufactured;
 
-    @Column(columnDefinition = "DATETIME2(0)")
     LocalDateTime imported;
 
-    @Column(columnDefinition = "DATETIME2(0)")
     LocalDateTime expiration;
 
-    @Column(columnDefinition = "NVARCHAR(255)")
+    @Column(columnDefinition = "VARCHAR(255)")
     String distributer;
 
     @ManyToOne

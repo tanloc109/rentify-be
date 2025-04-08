@@ -56,8 +56,59 @@ public class JwtGenerator {
         return result;
     }
 
-
     public String getEmailFromJwt(String token, EnumTokenType enumTokenType) {
-        return null;
+        try {
+            JWTVerifier verifier = JWT.require(algorithm)
+                    .withIssuer(AppConfig.getJWTIssuer())
+                    .build();
+            DecodedJWT decodedJWT = verifier.verify(token);
+            return decodedJWT.getClaim("email").asString();
+        } catch (JWTVerificationException exception) {
+            throw new UnauthorizedException(ApplicationMessage.INVALID_TOKEN);
+        }
+    }
+
+    public boolean validate(String token, EnumTokenType tokenType) {
+        try {
+            JWTVerifier verifier = JWT.require(algorithm)
+                    .withIssuer(AppConfig.getJWTIssuer())
+                    .build();
+            verifier.verify(token);
+            return true;
+        } catch (JWTVerificationException exception) {
+            return false;
+        }
+    }
+
+    public String generatedToken(CustomAccountDetail accountDetail) {
+        Map<String, String> payload = new HashMap<>();
+        payload.put("email", accountDetail.getEmail());
+        payload.put("role", accountDetail.getRole().getRoleName().name());
+        payload.put("firstName", accountDetail.getFirstName());
+        payload.put("lastName", accountDetail.getLastName());
+        payload.put("id", String.valueOf(accountDetail.getId()));
+        return generateToken(payload);
+    }
+
+    public String generatedRefreshToken(CustomAccountDetail accountDetail) {
+        Map<String, String> payload = new HashMap<>();
+        payload.put("email", accountDetail.getEmail());
+        payload.put("role", accountDetail.getRole().getRoleName().name());
+        payload.put("firstName", accountDetail.getFirstName());
+        payload.put("lastName", accountDetail.getLastName());
+        payload.put("id", String.valueOf(accountDetail.getId()));
+        String refreshToken;
+        try {
+            JWTCreator.Builder jwtBuilder = JWT.create();
+            jwtBuilder.withPayload(payload);
+            jwtBuilder.withIssuer(AppConfig.getJWTIssuer());
+            // Thời gian sống dài hơn cho refresh token
+            jwtBuilder.withExpiresAt(new Date(System.currentTimeMillis() + AppConfig.getJWTTimeToLive()));
+
+            refreshToken = jwtBuilder.sign(algorithm);
+        } catch (JWTCreationException exception){
+            throw new ServerErrorException(ApplicationMessage.GENERATE_FAILED, Response.Status.INTERNAL_SERVER_ERROR, exception);
+        }
+        return refreshToken;
     }
 }

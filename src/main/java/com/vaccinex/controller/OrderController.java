@@ -4,6 +4,9 @@ import com.vaccinex.dto.request.OrderRequest;
 
 import com.vaccinex.dto.response.ObjectResponse;
 import com.vaccinex.service.OrderService;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -16,6 +19,12 @@ import jakarta.ws.rs.core.Response;
 
 @Path("/orders")
 @Tag(name = "Order", description = "Order Management Operations")
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "Bearer",
+        bearerFormat = "JWT"
+)
 public class OrderController {
 
     @Inject
@@ -24,6 +33,7 @@ public class OrderController {
     @POST
     @Path("/deposit")
     @RolesAllowed("USER")
+    @SecurityRequirement(name = "bearerAuth")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response deposit(
@@ -37,6 +47,7 @@ public class OrderController {
     @POST
     @Path("/{orderId}/cancel")
     @RolesAllowed("USER")
+    @SecurityRequirement(name = "bearerAuth")
     @Produces(MediaType.APPLICATION_JSON)
     public Response cancel(@PathParam("orderId") Integer orderId) {
         return Response.ok(
@@ -51,6 +62,7 @@ public class OrderController {
     @GET
     @Path("/{orderId}/refund/amount")
     @RolesAllowed("USER")
+    @SecurityRequirement(name = "bearerAuth")
     @Produces(MediaType.APPLICATION_JSON)
     public Response calculateRefundAmount(@PathParam("orderId") Integer orderId) {
         return Response.ok(
@@ -65,6 +77,7 @@ public class OrderController {
     @GET
     @Path("/history/{customerId}")
     @Produces(MediaType.APPLICATION_JSON)
+    @SecurityRequirement(name = "bearerAuth")
     public Response getOrderHistory(@PathParam("customerId") Integer customerId) {
         return Response.ok(
                 ObjectResponse.builder()
@@ -77,6 +90,7 @@ public class OrderController {
 
     @GET
     @Path("/summary")
+    @SecurityRequirement(name = "bearerAuth")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getOrderSummary() {
         return Response.ok(
@@ -90,6 +104,7 @@ public class OrderController {
 
     @GET
     @Path("/revenue")
+    @SecurityRequirement(name = "bearerAuth")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRevenue() {
         return Response.ok(

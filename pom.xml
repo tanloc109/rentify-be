@@ -35,9 +35,7 @@
 		<logback-classic-version>1.4.12</logback-classic-version>
 		<sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
 		<jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
-		<sonar.exclusions>**/*com/rentify/Rentify.java</sonar.exclusions>
 		<sonar.coverage.exclusions>
-			**/*com/vaccinex/Rentify.java,
 			**/*com/vaccinex/configuration/**,
 			**/*com/vaccinex/exception/**,
 			**/*com/vaccinex/response/**,
@@ -225,6 +223,7 @@
 			<artifactId>jbcrypt</artifactId>
 			<version>0.4</version>
 		</dependency>
+
 	</dependencies>
 
 	<build>

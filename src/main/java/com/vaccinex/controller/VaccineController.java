@@ -13,6 +13,9 @@ import com.vaccinex.pojo.Vaccine;
 import com.vaccinex.service.BatchService;
 import com.vaccinex.service.VaccineService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -26,6 +29,13 @@ import java.util.List;
 
 @Path("/vaccines")
 @Tag(name = "Vaccine", description = "Vaccine Management Operations")
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "Bearer",
+        bearerFormat = "JWT"
+)
+@SecurityRequirement(name = "bearerAuth")
 public class VaccineController {
 
     @Inject
@@ -166,7 +176,7 @@ public class VaccineController {
 
     @GET
     @Path("/v2")
-    @RolesAllowed({"ADMIN", "STAFF"})
+    @RolesAllowed({"USER","ADMIN", "STAFF"})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getVaccines() {
         return Response.ok(vaccineService.getVaccines()).build();

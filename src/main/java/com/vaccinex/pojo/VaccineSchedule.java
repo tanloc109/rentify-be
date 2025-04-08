@@ -24,20 +24,18 @@ public class VaccineSchedule extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    @Column(columnDefinition = "DATETIME2(0)") //Stores upto minutes
     LocalDateTime date;
 
     @Enumerated(EnumType.STRING)
     VaccineScheduleStatus status;
 
-    @Column(columnDefinition = "TINYINT")
     @Min(1)
     @Max(5)
     Integer feedback;
 
     Integer orderNo;
 
-    @Column(columnDefinition = "NVARCHAR(1000)")
+    @Column(columnDefinition = "VARCHAR(1000)")
     String notes;
 
     @ManyToOne
