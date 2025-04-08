@@ -34,9 +34,8 @@ ENV VALID_CONNECTION_CHECKER org.jboss.jca.adapters.jdbc.extensions.postgres.Pos
 
 # Define database environment variables (these will be overridden by docker-compose)
 ARG DB_HOST=jdbc:postgresql://postgres:5432/vaccinedb
-ARG DB_NAME=vaccinedb
 ARG DB_USER=postgres
-ARG DB_PASS=Vaccinex123!@#
+ARG DB_PASS=VaccineX123!@#
 
 # Install PostgreSQL drivers and configure datasource
 USER root
